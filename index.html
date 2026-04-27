@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intervista sul Clima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #ede7d9;
+    --surface2: #e0d8c8;
+    --ink: #1a1714;
+    --ink-soft: #4a443c;
+    --ink-faint: #8a8278;
+    --accent: #2d5a3d;
+    --accent-light: #4a8c62;
+    --accent-pale: #d4e8da;
+    --warn: #8b4513;
+    --red: #c0392b;
+    --pause-color: #c07a00;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1rem 4rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(45,90,61,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(139,69,19,0.05) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .grain {
+    position: fixed; inset: 0; opacity: 0.025; pointer-events: none; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  .container { width: 100%; max-width: 680px; position: relative; z-index: 2; }
+
+  /* HEADER */
+  header { text-align: center; padding: 3.5rem 0 2rem; animation: fadeDown 0.8s ease both; }
+  .header-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; font-weight: 300; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+  header h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 300; line-height: 1.1; letter-spacing: -0.02em; }
+  header h1 em { font-style: italic; color: var(--accent); }
+  header p.subtitle { margin-top: 1rem; font-size: 1.05rem; font-weight: 300; color: var(--ink-soft); line-height: 1.6; max-width: 480px; margin-inline: auto; }
+  .divider { width: 40px; height: 1px; background: var(--accent); margin: 1.5rem auto; opacity: 0.4; }
+
+  .intro-card { background: var(--surface); border: 1px solid var(--surface2); border-radius: 4px; padding: 1.6rem 1.8rem; margin-bottom: 2rem; font-size: 0.95rem; color: var(--ink-soft); line-height: 1.7; animation: fadeUp 0.8s 0.2s ease both; }
+  .intro-card strong { color: var(--ink); font-weight: 600; }
+
+  /* QUESTION BLOCK */
+  .question-block { background: white; border: 1px solid var(--surface2); border-radius: 6px; padding: 2rem 1.8rem 1.6rem; margin-bottom: 1.5rem; box-shadow: 0 2px 24px rgba(0,0,0,0.04); animation: fadeUp 0.8s ease both; transition: box-shadow 0.3s, border-color 0.3s; }
+  .question-block:nth-child(1) { animation-delay: 0.3s; }
+  .question-block:nth-child(2) { animation-delay: 0.45s; }
+  .question-block.active { box-shadow: 0 4px 32px rgba(45,90,61,0.12); border-color: var(--accent-light); }
+  .question-block.done { border-color: var(--accent-pale); background: #fafcfb; }
+
+  .q-meta { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1rem; }
+  .q-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--accent); background: var(--accent-pale); padding: 0.25rem 0.6rem; border-radius: 2px; }
+  .q-status { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; }
+  .q-status.recording { color: var(--red); }
+  .q-status.paused { color: var(--pause-color); }
+  .q-status.done { color: var(--accent); }
+
+  .question-text { font-size: 1.25rem; font-weight: 400; line-height: 1.5; color: var(--ink); margin-bottom: 1.4rem; }
+
+  /* RECORDER */
+  .recorder-area { display: flex; flex-direction: column; gap: 0.85rem; }
+
+  .waveform-container { height: 52px; background: var(--surface); border-radius: 4px; overflow: hidden; position: relative; display: flex; align-items: center; padding: 0 12px; transition: background 0.3s; }
+  .waveform-container.paused-bg { background: #fdf3dc; }
+
+  .waveform-idle { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .waveform-idle span { display: block; width: 2px; height: 8px; background: var(--ink-faint); border-radius: 1px; opacity: 0.4; }
+
+  .waveform-paused { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.14em; color: var(--pause-color); text-transform: uppercase; }
+
+  .live-waveform { display: flex; align-items: center; gap: 2px; height: 100%; }
+  .live-bar { width: 3px; background: var(--accent); border-radius: 1.5px; transition: height 0.08s ease; min-height: 4px; }
+
+  /* CONTROLS */
+  .controls-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+  .btn-main {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.75rem 1.3rem; border-radius: 4px;
+    border: 1.5px solid var(--accent); background: var(--accent); color: white;
+    font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.18s; flex-shrink: 0; user-select: none;
+  }
+  .btn-main:hover { background: var(--accent-light); border-color: var(--accent-light); }
+  .btn-main.recording { background: var(--red); border-color: var(--red); animation: pulse-btn 2s ease infinite; }
+  .btn-main.recording:hover { background: #e74c3c; }
+  .btn-main.paused-state { background: var(--pause-color); border-color: var(--pause-color); animation: none; }
+  .btn-main.paused-state:hover { background: #d48a00; }
+  .btn-main .dot { width: 8px; height: 8px; border-radius: 50%; background: white; flex-shrink: 0; }
+  .btn-main.recording .dot { animation: blink 1.2s ease infinite; }
+
+  .btn-action {
+    display: none; align-items: center; gap: 0.4rem;
+    padding: 0.72rem 0.95rem; border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.18s; white-space: nowrap;
+  }
+  .btn-action.show { display: flex; }
+
+  .btn-submit { border: 1.5px solid var(--accent); background: var(--accent-pale); color: var(--accent); }
+  .btn-submit:hover { background: var(--accent); color: white; }
+
+  .btn-restart { border: 1.5px solid var(--surface2); background: transparent; color: var(--ink-faint); }
+  .btn-restart:hover { border-color: var(--red); color: var(--red); }
+
+  .btn-play { display: flex; align-items: center; gap: 0.5rem; padding: 0.72rem 0.95rem; border-radius: 4px; border: 1.5px solid var(--surface2); background: transparent; color: var(--ink-soft); font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-play:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .btn-play:disabled { opacity: 0.35; cursor: default; }
+
+  .timer { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--ink-faint); margin-left: auto; }
+  .timer.active { color: var(--red); }
+  .timer.paused-col { color: var(--pause-color); }
+
+  .hint-text { font-family: 'DM Mono', monospace; font-size: 0.59rem; letter-spacing: 0.08em; color: var(--ink-faint); padding: 0 0.1rem; min-height: 1em; }
+
+  /* ANALYSIS */
+  .analysis-panel { margin-top: 1rem; padding: 1rem 1.2rem; background: var(--surface); border-radius: 4px; display: none; }
+  .analysis-panel.visible { display: block; }
+  .analysis-title { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.8rem; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  @media (min-width: 480px) { .metrics-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .metric-card { background: white; border-radius: 4px; padding: 0.65rem 0.7rem; border: 1px solid var(--surface2); }
+  .metric-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.3rem; }
+  .metric-value { font-size: 1.3rem; font-weight: 600; color: var(--ink); line-height: 1; }
+  .metric-value.high { color: var(--red); }
+  .metric-value.medium { color: var(--warn); }
+  .metric-value.low { color: var(--accent); }
+  .metric-sub { font-size: 0.7rem; color: var(--ink-faint); margin-top: 0.15rem; }
+
+  .detail-row { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--surface2); }
+  .detail-label { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem; }
+  .bar-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .bar-item { display: flex; align-items: center; gap: 0.6rem; }
+  .bar-label { width: 90px; color: var(--ink-soft); font-size: 0.8rem; }
+  .bar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+  .bar-fill.warm { background: var(--warn); }
+  .bar-fill.hot { background: var(--red); }
+  .bar-val { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--ink-faint); width: 36px; text-align: right; }
+  .notes-text { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.6; font-style: italic; }
+
+  /* DOWNLOAD */
+  .download-section { margin-top: 2.5rem; padding: 1.8rem; background: var(--accent-pale); border: 1px solid rgba(45,90,61,0.2); border-radius: 6px; display: none; animation: fadeUp 0.6s ease both; }
+  .download-section.visible { display: block; }
+  .download-title { font-size: 1.3rem; font-weight: 400; margin-bottom: 0.4rem; color: var(--accent); }
+  .download-sub { font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 1.2rem; }
+  .btn-group { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+  .btn-download { display: flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.2rem; border-radius: 4px; border: 1.5px solid var(--accent); background: var(--accent); color: white; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .btn-download:hover { background: var(--accent-light); }
+  .btn-download.secondary { background: transparent; color: var(--accent); }
+  .btn-download.secondary:hover { background: rgba(45,90,61,0.08); }
+
+  /* PROGRESS */
+  .progress-bar { display: flex; justify-content: center; gap: 0.5rem; margin: 1.5rem 0; animation: fadeUp 0.8s 0.1s ease both; }
+  .progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface2); transition: background 0.3s; }
+  .progress-dot.done { background: var(--accent); }
+  .progress-dot.current { background: var(--accent-light); }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px);} to {opacity:1;transform:translateY(0);} }
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(14px); } to {opacity:1;transform:translateY(0);} }
+  @keyframes pulse-btn { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4);} 50%{box-shadow:0 0 0 8px rgba(192,57,43,0);} }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  footer { margin-top: 3rem; text-align: center; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; color: var(--ink-faint); position: relative; z-index: 2; animation: fadeUp 1s 0.6s ease both; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="container">
+
+  <header>
+    <div class="header-label">Ricerca sul Clima — Intervista</div>
+    <h1>La tua voce<br>sul <em>cambiamento</em></h1>
+    <div class="divider"></div>
+    <p class="subtitle">Rispondi liberamente alle domande seguenti. Non ci sono risposte giuste o sbagliate.</p>
+  </header>
+
+  <div class="intro-card">
+    <strong>Come funziona:</strong> premi <em>Avvia</em> per iniziare.
+    Un clic mette in <em>pausa</em> — puoi riprendere quando vuoi.
+    Quando hai finito, premi <em>✓ Invia</em> per confermare,
+    oppure <em>↺ Ricomincia</em> per registrare da capo.
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-dot current" id="dot1"></div>
+    <div class="progress-dot" id="dot2"></div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="question-block active" id="block1">
+    <div class="q-meta">
+      <span class="q-num">Domanda 01</span>
+      <span class="q-status" id="status1">In attesa</span>
+    </div>
+    <div class="question-text">
+      Come descriverebbe i cambiamenti climatici che ha percepito nella sua vita quotidiana negli ultimi anni? Ci sono eventi o situazioni specifiche che l'hanno colpita particolarmente?
+    </div>
+    <div class="recorder-area">
+      <div class="waveform-container" id="wc1">
+        <div class="waveform-idle" id="idle1"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="waveform-paused" id="paused1">⏸ &nbsp;In pausa — clicca per continuare</div>
+        <div class="live-waveform" id="live1" style="display:none"></div>
+      </div>
+      <div class="controls-row">
+        <button class="btn-main" id="main1" onclick="handleMain(1)">
+          <span class="dot"></span><span id="lbl1">Avvia risposta</span>
+        </button>
+        <button class="btn-action btn-submit" id="sub1" onclick="submitAnswer(1)">✓ Invia</button>
+        <button class="btn-action btn-restart" id="rst1" onclick="cancelAnswer(1)">↺ Ricomincia</button>
+        <button class="btn-play" id="play1" disabled onclick="playback(1)">▶ Riascolto</button>
+        <span class="timer" id="timer1">0:00</span>
+      </div>
+      <div class="hint-text" id="hint1">Clicca per avviare la registrazione</div>
+    </div>
+    <div class="analysis-panel" id="analysis1">
+      <div class="analysis-title">Analisi Paralinguistica</div>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-label">Durata</div><div class="metric-value" id="m1-dur">—</div><div class="metric-sub">secondi</div></div>
+        <div class="metric-card"><div class="metric-label">Intensità</div><div class="metric-value" id="m1-int">—</div><div class="metric-sub" id="m1-int-sub">—</div></div>
+        <div class="metric-card"><div class="metric-label">Pause</div><div class="metric-value" id="m1-pau">—</div><div class="metric-sub">rilevate</div></div>
+        <div class="metric-card"><div class="metric-label">Ritmo</div><div class="metric-value" id="m1-rhy">—</div><div class="metric-sub" id="m1-rhy-sub">—</div></div>
+      </div>
+      <div class="detail-row"><div class="detail-label">Profilo energetico (per segmento)</div><div class="bar-group" id="m1-seg"></div></div>
+      <div class="detail-row"><div class="detail-label">Osservazioni</div><div class="notes-text" id="m1-notes">—</div></div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-block" id="block2" style="opacity:.5;pointer-events:none;">
+    <div class="q-meta">
+      <span class="q-num">Domanda 02</span>
+      <span class="q-status" id="status2">In attesa</span>
+    </div>
+    <div class="question-text">
+      Qual è il cambiamento climatico che la preoccupa di più per il futuro, e cosa pensa che noi — come individui e come società — potremmo o dovremmo fare?
+    </div>
+    <div class="recorder-area">
+      <div class="waveform-container" id="wc2">
+        <div class="waveform-idle" id="idle2"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="waveform-paused" id="paused2">⏸ &nbsp;In pausa — clicca per continuare</div>
+        <div class="live-waveform" id="live2" style="display:none"></div>
+      </div>
+      <div class="controls-row">
+        <button class="btn-main" id="main2" onclick="handleMain(2)">
+          <span class="dot"></span><span id="lbl2">Avvia risposta</span>
+        </button>
+        <button class="btn-action btn-submit" id="sub2" onclick="submitAnswer(2)">✓ Invia</button>
+        <button class="btn-action btn-restart" id="rst2" onclick="cancelAnswer(2)">↺ Ricomincia</button>
+        <button class="btn-play" id="play2" disabled onclick="playback(2)">▶ Riascolto</button>
+        <span class="timer" id="timer2">0:00</span>
+      </div>
+      <div class="hint-text" id="hint2">Clicca per avviare la registrazione</div>
+    </div>
+    <div class="analysis-panel" id="analysis2">
+      <div class="analysis-title">Analisi Paralinguistica</div>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-label">Durata</div><div class="metric-value" id="m2-dur">—</div><div class="metric-sub">secondi</div></div>
+        <div class="metric-card"><div class="metric-label">Intensità</div><div class="metric-value" id="m2-int">—</div><div class="metric-sub" id="m2-int-sub">—</div></div>
+        <div class="metric-card"><div class="metric-label">Pause</div><div class="metric-value" id="m2-pau">—</div><div class="metric-sub">rilevate</div></div>
+        <div class="metric-card"><div class="metric-label">Ritmo</div><div class="metric-value" id="m2-rhy">—</div><div class="metric-sub" id="m2-rhy-sub">—</div></div>
+      </div>
+      <div class="detail-row"><div class="detail-label">Profilo energetico (per segmento)</div><div class="bar-group" id="m2-seg"></div></div>
+      <div class="detail-row"><div class="detail-label">Osservazioni</div><div class="notes-text" id="m2-notes">—</div></div>
+    </div>
+  </div>
+
+  <div class="download-section" id="dlSec">
+    <div class="download-title">Grazie per la tua partecipazione</div>
+    <div class="download-sub">Le risposte sono pronte. Scarica i file audio e il report di analisi.</div>
+    <div class="btn-group">
+      <a class="btn-download" id="dl1" href="#" download="risposta_domanda1.webm">↓ Audio Domanda 1</a>
+      <a class="btn-download" id="dl2" href="#" download="risposta_domanda2.webm">↓ Audio Domanda 2</a>
+      <button class="btn-download secondary" onclick="downloadReport()">↓ Report Analisi (.txt)</button>
+    </div>
+  </div>
+</div>
+
+<footer>Intervista riservata · Registrazioni locali · Nessun dato trasmesso</footer>
+
+<script>
+/* ══════════════════════════════════════════
+   STATE  — phase: idle | recording | paused | done
+══════════════════════════════════════════ */
+const S = {
+  1: mkState(),
+  2: mkState()
+};
+
+function mkState() {
+  return {
+    phase: 'idle',
+    mr: null, chunks: [], stream: null,
+    analyser: null, _ctx: null, animFrame: null,
+    startTime: null, elapsedMs: 0, timerInt: null,
+    volHistory: [], silences: [], lastSil: null,
+    audioURL: null, audioBlob: null, analysis: null
+  };
+}
+
+/* ══════════════════════════════════════════
+   MAIN BUTTON  — start / pause / resume
+══════════════════════════════════════════ */
+function handleMain(q) {
+  const s = S[q];
+  if (s.phase === 'idle')      startRec(q);
+  else if (s.phase === 'recording') pauseRec(q);
+  else if (s.phase === 'paused')    resumeRec(q);
+}
+
+/* ══ START ══ */
+async function startRec(q) {
+  const s = S[q];
+  // clean previous attempt
+  s.chunks = []; s.volHistory = []; s.silences = []; s.lastSil = null;
+  s.elapsedMs = 0; s.audioURL = null; s.audioBlob = null;
+
+  try {
+    s.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(e) {
+    alert('Impossibile accedere al microfono. Controlla i permessi del browser.');
+    return;
+  }
+
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = ctx.createMediaStreamSource(s.stream);
+  const an  = ctx.createAnalyser();
+  an.fftSize = 256; an.smoothingTimeConstant = 0.6;
+  src.connect(an);
+  s.analyser = an; s._ctx = ctx;
+
+  const mr = new MediaRecorder(s.stream, { mimeType: mimeType() });
+  mr.ondataavailable = e => { if (e.data.size > 0) s.chunks.push(e.data); };
+  mr.start(100);
+  s.mr = mr;
+
+  s.phase = 'recording';
+  s.startTime = Date.now();
+  startTimer(q);
+  showLive(q);
+  renderUI(q);
+}
+
+/* ══ PAUSE ══ */
+function pauseRec(q) {
+  const s = S[q];
+  s.elapsedMs += Date.now() - s.startTime;
+  s.startTime = null;
+  if (s.mr && s.mr.state === 'recording') s.mr.pause();
+  clearInterval(s.timerInt);
+  cancelAnimationFrame(s.animFrame);
+  s.silences.push(Date.now()); // voluntary pause counts
+  s.phase = 'paused';
+  showPaused(q);
+  renderUI(q);
+}
+
+/* ══ RESUME ══ */
+function resumeRec(q) {
+  const s = S[q];
+  if (s.mr && s.mr.state === 'paused') s.mr.resume();
+  s.startTime = Date.now();
+  s.phase = 'recording';
+  startTimer(q);
+  showLive(q);
+  renderUI(q);
+}
+
+/* ══ SUBMIT ══ */
+async function submitAnswer(q) {
+  const s = S[q];
+  if (s.phase === 'recording') {
+    s.elapsedMs += Date.now() - s.startTime;
+    cancelAnimationFrame(s.animFrame);
+    clearInterval(s.timerInt);
+  }
+  if (s.mr) { s.mr.stop(); }
+  if (s.stream) s.stream.getTracks().forEach(t => t.stop());
+
+  await new Promise(r => setTimeout(r, 200));
+
+  const blob = new Blob(s.chunks, { type: mimeType() || 'audio/webm' });
+  s.audioBlob = blob;
+  s.audioURL  = URL.createObjectURL(blob);
+
+  const dur = Math.round(s.elapsedMs / 1000);
+  s.analysis = analyze(q, dur);
+  s.phase = 'done';
+
+  hideLive(q);
+  renderAnalysis(q, s.analysis);
+  renderUI(q);
+
+  document.getElementById('block' + q).classList.add('done');
+
+  if (q === 1) {
+    const b2 = document.getElementById('block2');
+    b2.style.opacity = '1'; b2.style.pointerEvents = 'auto';
+    b2.classList.add('active');
+    markProgress(1);
+  }
+  if (q === 2) { markProgress(2); showDownload(); }
+}
+
+/* ══ CANCEL / RESTART ══ */
+function cancelAnswer(q) {
+  const s = S[q];
+  if (s.mr && s.mr.state !== 'inactive') s.mr.stop();
+  if (s.stream) s.stream.getTracks().forEach(t => t.stop());
+  cancelAnimationFrame(s.animFrame);
+  clearInterval(s.timerInt);
+
+  Object.assign(s, mkState()); // full reset
+
+  document.getElementById('timer' + q).textContent = '0:00';
+  document.getElementById('timer' + q).className = 'timer';
+  document.getElementById('analysis' + q).classList.remove('visible');
+  hideLive(q);
+  renderUI(q);
+}
+
+/* ══════════════════════════════════════════
+   UI RENDERER
+══════════════════════════════════════════ */
+function renderUI(q) {
+  const s = S[q];
+  const btn   = document.getElementById('main' + q);
+  const lbl   = document.getElementById('lbl' + q);
+  const st    = document.getElementById('status' + q);
+  const hint  = document.getElementById('hint' + q);
+  const subB  = document.getElementById('sub' + q);
+  const rstB  = document.getElementById('rst' + q);
+  const playB = document.getElementById('play' + q);
+
+  btn.className = 'btn-main';
+  subB.className = 'btn-action btn-submit';
+  rstB.className = 'btn-action btn-restart';
+
+  if (s.phase === 'idle') {
+    lbl.textContent = 'Avvia risposta';
+    st.textContent = 'In attesa'; st.className = 'q-status';
+    hint.textContent = 'Clicca per avviare la registrazione';
+    playB.disabled = true;
+    btn.style.display = '';
+
+  } else if (s.phase === 'recording') {
+    btn.classList.add('recording');
+    lbl.textContent = 'Pausa';
+    st.textContent = '● Registrazione'; st.className = 'q-status recording';
+    hint.textContent = '1 clic = pausa  ·  "✓ Invia" per confermare';
+    subB.classList.add('show');
+    rstB.classList.add('show');
+    playB.disabled = true;
+    btn.style.display = '';
+
+  } else if (s.phase === 'paused') {
+    btn.classList.add('paused-state');
+    lbl.textContent = 'Riprendi';
+    st.textContent = '⏸ In pausa'; st.className = 'q-status paused';
+    hint.textContent = 'Clicca per riprendere  ·  oppure invia o ricomincia';
+    subB.classList.add('show');
+    rstB.classList.add('show');
+    playB.disabled = true;
+    btn.style.display = '';
+
+  } else if (s.phase === 'done') {
+    btn.style.display = 'none';
+    st.textContent = '✓ Risposta acquisita'; st.className = 'q-status done';
+    hint.textContent = '';
+    rstB.classList.add('show'); // allow re-record even after done
+    playB.disabled = false;
+  }
+}
+
+/* ══════════════════════════════════════════
+   WAVEFORM
+══════════════════════════════════════════ */
+function showLive(q) {
+  const s = S[q];
+  document.getElementById('idle' + q).style.display = 'none';
+  document.getElementById('paused' + q).style.display = 'none';
+  document.getElementById('wc' + q).classList.remove('paused-bg');
+
+  const div = document.getElementById('live' + q);
+  div.style.display = 'flex';
+  div.innerHTML = '';
+
+  const N = 32;
+  for (let i = 0; i < N; i++) {
+    const b = document.createElement('div');
+    b.className = 'live-bar'; b.style.height = '4px';
+    div.appendChild(b);
+  }
+
+  const bars = div.querySelectorAll('.live-bar');
+  const an = s.analyser;
+  const data = new Uint8Array(an.frequencyBinCount);
+
+  function draw() {
+    if (s.phase !== 'recording') return;
+    an.getByteFrequencyData(data);
+    const vol = data.reduce((a, b) => a + b, 0) / data.length;
+    s.volHistory.push(Math.round((vol / 255) * 100));
+
+    // silence detection
+    if (vol < 8) {
+      if (!s.lastSil) s.lastSil = Date.now();
+      else if (Date.now() - s.lastSil > 600) {
+        const last = s.silences[s.silences.length - 1];
+        if (!last || Date.now() - last > 1200) s.silences.push(Date.now());
+      }
+    } else s.lastSil = null;
+
+    const step = Math.floor(data.length / N);
+    bars.forEach((bar, i) => {
+      const v = data[i * step] || 0;
+      bar.style.height = Math.max(4, (v / 255) * 44) + 'px';
+      const p = (v / 255) * 100;
+      bar.style.background = p > 70 ? '#c0392b' : p > 45 ? '#8b4513' : 'var(--accent)';
+    });
+    s.animFrame = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function showPaused(q) {
+  document.getElementById('live' + q).style.display = 'none';
+  document.getElementById('idle' + q).style.display = 'none';
+  document.getElementById('paused' + q).style.display = 'flex';
+  document.getElementById('wc' + q).classList.add('paused-bg');
+}
+
+function hideLive(q) {
+  document.getElementById('live' + q).style.display = 'none';
+  document.getElementById('paused' + q).style.display = 'none';
+  document.getElementById('wc' + q).classList.remove('paused-bg');
+  document.getElementById('idle' + q).style.display = 'flex';
+}
+
+/* ══════════════════════════════════════════
+   TIMER  (pause-aware)
+══════════════════════════════════════════ */
+function startTimer(q) {
+  const el = document.getElementById('timer' + q);
+  el.className = 'timer active';
+  clearInterval(S[q].timerInt);
+  S[q].timerInt = setInterval(() => {
+    const s = S[q];
+    const total = s.elapsedMs + (s.startTime ? Date.now() - s.startTime : 0);
+    const sec = Math.floor(total / 1000);
+    el.textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    if (s.phase === 'paused') {
+      el.className = 'timer paused-col';
+      clearInterval(s.timerInt);
+    }
+  }, 250);
+}
+
+/* ══════════════════════════════════════════
+   PLAYBACK
+══════════════════════════════════════════ */
+function playback(q) {
+  if (S[q].audioURL) new Audio(S[q].audioURL).play();
+}
+
+/* ══════════════════════════════════════════
+   MIME
+══════════════════════════════════════════ */
+function mimeType() {
+  const t = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+  return t.find(m => MediaRecorder.isTypeSupported(m)) || '';
+}
+function ext() {
+  const m = mimeType();
+  return m.includes('ogg') ? 'ogg' : m.includes('mp4') ? 'mp4' : 'webm';
+}
+
+/* ══════════════════════════════════════════
+   ANALYSIS
+══════════════════════════════════════════ */
+function analyze(q, duration) {
+  const s = S[q];
+  const h = s.volHistory;
+  const sil = s.silences;
+
+  if (!h.length) return { duration, intensity: 50, intensityLabel: 'media', pauseCount: sil.length, rhythm: 'regolare', segments: [], notes: 'Dati non disponibili.' };
+
+  const avg = h.reduce((a, b) => a + b, 0) / h.length;
+  const max = Math.max(...h);
+  const variance = h.reduce((a, v) => a + (v - avg) ** 2, 0) / h.length;
+  const sd = Math.sqrt(variance);
+
+  const segSz = Math.floor(h.length / 5) || 1;
+  const segments = Array.from({ length: 5 }, (_, i) => {
+    const sl = h.slice(i * segSz, (i + 1) * segSz);
+    return { label: `Seg. ${i + 1}`, value: sl.length ? Math.round(sl.reduce((a, b) => a + b, 0) / sl.length) : 0 };
+  });
+
+  const intensity = Math.round(Math.min(avg * 1.2, 100));
+  const intensityLabel = intensity > 65 ? 'alta' : intensity > 40 ? 'media' : 'bassa';
+  const pauseCount = sil.length;
+  const rs = sd / (avg || 1);
+  const rhythm = rs > 0.7 ? 'variato' : rs > 0.4 ? 'dinamico' : 'regolare';
+  const notes = buildNotes(intensity, pauseCount, duration, rhythm);
+
+  return { duration, intensity, intensityLabel, pauseCount, rhythm, segments, notes };
+}
+
+function buildNotes(intensity, pauses, duration, rhythm) {
+  const p = [];
+  if (intensity > 70) p.push('Risposta ad alta energia — voce sostenuta, forte coinvolgimento emotivo.');
+  else if (intensity > 45) p.push('Intensità vocale nella norma — risposta equilibrata.');
+  else p.push('Intensità contenuta — risposta riflessiva o prudente.');
+
+  if (pauses > 8) p.push(`${pauses} pause rilevate (incluse pause volontarie) — elaborazione complessa del tema.`);
+  else if (pauses > 3) p.push(`${pauses} pause rilevate — flusso narrativo con momenti di riflessione.`);
+  else p.push('Poche pause — risposta fluida e strutturata.');
+
+  if (duration < 20) p.push('Risposta breve — sintetica o argomento distante.');
+  else if (duration > 90) p.push('Risposta lunga e articolata — alto coinvolgimento col tema.');
+
+  if (rhythm === 'variato') p.push('Ritmo molto variabile — picchi emotivi marcati.');
+  else if (rhythm === 'dinamico') p.push('Ritmo dinamico — buona modulazione espressiva.');
+  return p.join(' ');
+}
+
+function renderAnalysis(q, a) {
+  document.getElementById('analysis' + q).classList.add('visible');
+
+  const ie = document.getElementById('m' + q + '-int');
+  ie.textContent = a.intensity;
+  ie.className = 'metric-value ' + (a.intensity > 65 ? 'high' : a.intensity > 40 ? 'medium' : 'low');
+  document.getElementById('m' + q + '-int-sub').textContent = a.intensityLabel;
+  document.getElementById('m' + q + '-dur').textContent = a.duration;
+  document.getElementById('m' + q + '-pau').textContent = a.pauseCount;
+
+  const re = document.getElementById('m' + q + '-rhy');
+  re.textContent = a.rhythm === 'variato' ? '~' : a.rhythm === 'dinamico' ? '≈' : '–';
+  document.getElementById('m' + q + '-rhy-sub').textContent = a.rhythm;
+
+  const sc = document.getElementById('m' + q + '-seg');
+  sc.innerHTML = '';
+  a.segments.forEach(sg => {
+    const cls = sg.value > 65 ? 'hot' : sg.value > 40 ? 'warm' : '';
+    const d = document.createElement('div');
+    d.className = 'bar-item';
+    d.innerHTML = `<span class="bar-label">${sg.label}</span><div class="bar-track"><div class="bar-fill ${cls}" style="width:${sg.value}%"></div></div><span class="bar-val">${sg.value}%</span>`;
+    sc.appendChild(d);
+  });
+
+  document.getElementById('m' + q + '-notes').textContent = a.notes;
+}
+
+/* ══════════════════════════════════════════
+   PROGRESS / DOWNLOAD
+══════════════════════════════════════════ */
+function markProgress(q) {
+  document.getElementById('dot' + q).className = 'progress-dot done';
+  if (q < 2) document.getElementById('dot' + (q + 1)).className = 'progress-dot current';
+}
+
+function showDownload() {
+  document.getElementById('dlSec').classList.add('visible');
+  const e = ext();
+  if (S[1].audioURL) { const a = document.getElementById('dl1'); a.href = S[1].audioURL; a.download = 'risposta_domanda1.' + e; }
+  if (S[2].audioURL) { const a = document.getElementById('dl2'); a.href = S[2].audioURL; a.download = 'risposta_domanda2.' + e; }
+}
+
+function downloadReport() {
+  const lines = [
+    'REPORT ANALISI PARALINGUISTICA — INTERVISTA SUL CLIMA',
+    'Generato il: ' + new Date().toLocaleString('it-IT'),
+    '═'.repeat(55)
+  ];
+  [1, 2].forEach(q => {
+    const a = S[q].analysis;
+    if (!a) return;
+    lines.push('', 'DOMANDA ' + q, '─'.repeat(40));
+    lines.push(q === 1
+      ? 'Come descriverebbe i cambiamenti climatici percepiti nella vita quotidiana?'
+      : 'Qual è il cambiamento climatico che la preoccupa di più per il futuro?');
+    lines.push('', 'Metriche:',
+      `  Durata: ${a.duration} sec`,
+      `  Intensità vocale: ${a.intensity}/100 (${a.intensityLabel})`,
+      `  Pause: ${a.pauseCount} (incluse pause volontarie)`,
+      `  Ritmo: ${a.rhythm}`,
+      '', 'Profilo energetico:');
+    a.segments.forEach(s => lines.push(`  ${s.label}: ${s.value}%`));
+    lines.push('', 'Osservazioni paralinguistiche:', '  ' + a.notes);
+  });
+  lines.push('', '═'.repeat(55), `File audio: risposta_domanda1.${ext()} / risposta_domanda2.${ext()}`);
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  Object.assign(document.createElement('a'), { href: url, download: 'report_analisi_intervista.txt' }).click();
+}
+</script>
+</body>
+</html>
