@@ -1,0 +1,9 @@
+{
+  "name": "climate-interview",
+  "version": "1.0.0",
+  "description": "Audio interview system for climate research",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}
