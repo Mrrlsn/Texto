@@ -21,56 +21,103 @@
     --red: #c0392b;
     --pause-color: #c07a00;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 1rem 4rem;
-    position: relative;
-    overflow-x: hidden;
+    background: var(--bg); color: var(--ink);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 0 1rem 5rem;
+    position: relative; overflow-x: hidden;
   }
-
   body::before {
-    content: '';
-    position: fixed; inset: 0;
+    content: ''; position: fixed; inset: 0;
     background:
       radial-gradient(ellipse 80% 60% at 20% 10%, rgba(45,90,61,0.06) 0%, transparent 60%),
       radial-gradient(ellipse 60% 80% at 80% 90%, rgba(139,69,19,0.05) 0%, transparent 60%);
     pointer-events: none; z-index: 0;
   }
-
   .grain {
     position: fixed; inset: 0; opacity: 0.025; pointer-events: none; z-index: 1;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-size: 200px;
   }
-
-  .container { width: 100%; max-width: 680px; position: relative; z-index: 2; }
+  .container { width: 100%; max-width: 700px; position: relative; z-index: 2; }
 
   /* HEADER */
   header { text-align: center; padding: 3.5rem 0 2rem; animation: fadeDown 0.8s ease both; }
   .header-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; font-weight: 300; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
-  header h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 300; line-height: 1.1; letter-spacing: -0.02em; }
+  header h1 { font-size: clamp(2rem, 6vw, 3rem); font-weight: 300; line-height: 1.1; letter-spacing: -0.02em; }
   header h1 em { font-style: italic; color: var(--accent); }
-  header p.subtitle { margin-top: 1rem; font-size: 1.05rem; font-weight: 300; color: var(--ink-soft); line-height: 1.6; max-width: 480px; margin-inline: auto; }
+  header p.subtitle { margin-top: 1rem; font-size: 1.05rem; font-weight: 300; color: var(--ink-soft); line-height: 1.6; max-width: 500px; margin-inline: auto; }
   .divider { width: 40px; height: 1px; background: var(--accent); margin: 1.5rem auto; opacity: 0.4; }
 
-  .intro-card { background: var(--surface); border: 1px solid var(--surface2); border-radius: 4px; padding: 1.6rem 1.8rem; margin-bottom: 2rem; font-size: 0.95rem; color: var(--ink-soft); line-height: 1.7; animation: fadeUp 0.8s 0.2s ease both; }
-  .intro-card strong { color: var(--ink); font-weight: 600; }
+  /* INTRO / BENCHMARK SECTION */
+  .section-card {
+    background: white; border: 1px solid var(--surface2); border-radius: 6px;
+    padding: 2rem 1.8rem; margin-bottom: 1.5rem;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.04);
+    animation: fadeUp 0.8s ease both;
+  }
+  .section-card:nth-child(1) { animation-delay: 0.15s; }
+  .section-card:nth-child(2) { animation-delay: 0.3s; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--accent-pale); }
+
+  .intro-text { font-size: 1.05rem; color: var(--ink-soft); line-height: 1.75; }
+  .intro-text p + p { margin-top: 0.9rem; }
+  .intro-text strong { color: var(--ink); font-weight: 600; }
+
+  /* BENCHMARK AUDIO */
+  .benchmark-wrap { margin-top: 1.4rem; }
+  .benchmark-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.7rem; }
+  .benchmark-text {
+    background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 4px 4px 0;
+    padding: 1rem 1.2rem; font-size: 1rem; color: var(--ink-soft); line-height: 1.7;
+    font-style: italic; margin-bottom: 1rem;
+  }
+
+  .btn-benchmark {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    padding: 0.7rem 1.2rem; border-radius: 4px;
+    border: 1.5px solid var(--accent); background: transparent; color: var(--accent);
+    font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-benchmark:hover { background: var(--accent); color: white; }
+  .btn-benchmark.playing { background: var(--accent); color: white; }
+  .btn-benchmark .b-icon { font-size: 0.9rem; }
+
+  .benchmark-note { margin-top: 0.7rem; font-size: 0.82rem; color: var(--ink-faint); font-style: italic; line-height: 1.5; }
+
+  /* CONTROLS GUIDE */
+  .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.7rem; margin-top: 1rem; }
+  .guide-item { background: var(--surface); border-radius: 4px; padding: 0.8rem 0.9rem; }
+  .guide-icon { font-size: 1.1rem; margin-bottom: 0.3rem; }
+  .guide-title { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.25rem; }
+  .guide-desc { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.4; }
+
+  /* PROGRESS */
+  .progress-bar { display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1.5rem 0; animation: fadeUp 0.8s 0.1s ease both; }
+  .progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface2); transition: background 0.4s; }
+  .progress-dot.done { background: var(--accent); }
+  .progress-dot.current { background: var(--accent-light); box-shadow: 0 0 0 3px var(--accent-pale); }
+  .progress-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; color: var(--ink-faint); }
 
   /* QUESTION BLOCK */
-  .question-block { background: white; border: 1px solid var(--surface2); border-radius: 6px; padding: 2rem 1.8rem 1.6rem; margin-bottom: 1.5rem; box-shadow: 0 2px 24px rgba(0,0,0,0.04); animation: fadeUp 0.8s ease both; transition: box-shadow 0.3s, border-color 0.3s; }
-  .question-block:nth-child(1) { animation-delay: 0.3s; }
-  .question-block:nth-child(2) { animation-delay: 0.45s; }
+  .question-block {
+    background: white; border: 1px solid var(--surface2); border-radius: 6px;
+    padding: 2rem 1.8rem 1.6rem; margin-bottom: 1.5rem;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.04);
+    animation: fadeUp 0.8s ease both; transition: box-shadow 0.3s, border-color 0.3s;
+  }
   .question-block.active { box-shadow: 0 4px 32px rgba(45,90,61,0.12); border-color: var(--accent-light); }
   .question-block.done { border-color: var(--accent-pale); background: #fafcfb; }
+  .question-block.locked { opacity: 0.45; pointer-events: none; }
 
   .q-meta { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1rem; }
   .q-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--accent); background: var(--accent-pale); padding: 0.25rem 0.6rem; border-radius: 2px; }
@@ -79,20 +126,24 @@
   .q-status.paused { color: var(--pause-color); }
   .q-status.done { color: var(--accent); }
 
-  .question-text { font-size: 1.25rem; font-weight: 400; line-height: 1.5; color: var(--ink); margin-bottom: 1.4rem; }
+  .question-text { font-size: 1.25rem; font-weight: 400; line-height: 1.55; color: var(--ink); margin-bottom: 1.4rem; }
 
   /* RECORDER */
   .recorder-area { display: flex; flex-direction: column; gap: 0.85rem; }
 
-  .waveform-container { height: 52px; background: var(--surface); border-radius: 4px; overflow: hidden; position: relative; display: flex; align-items: center; padding: 0 12px; transition: background 0.3s; }
+  .waveform-container {
+    height: 56px; background: var(--surface); border-radius: 4px; overflow: hidden;
+    position: relative; display: flex; align-items: center; padding: 0 14px;
+    transition: background 0.3s;
+  }
   .waveform-container.paused-bg { background: #fdf3dc; }
 
-  .waveform-idle { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
-  .waveform-idle span { display: block; width: 2px; height: 8px; background: var(--ink-faint); border-radius: 1px; opacity: 0.4; }
+  .wf-idle { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .wf-idle span { display: block; width: 2px; height: 8px; background: var(--ink-faint); border-radius: 1px; opacity: 0.35; }
 
-  .waveform-paused { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.14em; color: var(--pause-color); text-transform: uppercase; }
+  .wf-paused { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.14em; color: var(--pause-color); text-transform: uppercase; }
 
-  .live-waveform { display: flex; align-items: center; gap: 2px; height: 100%; }
+  .wf-live { display: flex; align-items: center; gap: 2px; height: 100%; }
   .live-bar { width: 3px; background: var(--accent); border-radius: 1.5px; transition: height 0.08s ease; min-height: 4px; }
 
   /* CONTROLS */
@@ -100,10 +151,10 @@
 
   .btn-main {
     display: flex; align-items: center; gap: 0.6rem;
-    padding: 0.75rem 1.3rem; border-radius: 4px;
+    padding: 0.78rem 1.3rem; border-radius: 4px;
     border: 1.5px solid var(--accent); background: var(--accent); color: white;
     font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
-    cursor: pointer; transition: all 0.18s; flex-shrink: 0; user-select: none;
+    cursor: pointer; transition: all 0.18s; user-select: none;
   }
   .btn-main:hover { background: var(--accent-light); border-color: var(--accent-light); }
   .btn-main.recording { background: var(--red); border-color: var(--red); animation: pulse-btn 2s ease infinite; }
@@ -115,79 +166,74 @@
 
   .btn-action {
     display: none; align-items: center; gap: 0.4rem;
-    padding: 0.72rem 0.95rem; border-radius: 4px;
+    padding: 0.74rem 0.95rem; border-radius: 4px;
     font-family: 'DM Mono', monospace; font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase;
     cursor: pointer; transition: all 0.18s; white-space: nowrap;
   }
   .btn-action.show { display: flex; }
-
   .btn-submit { border: 1.5px solid var(--accent); background: var(--accent-pale); color: var(--accent); }
   .btn-submit:hover { background: var(--accent); color: white; }
-
   .btn-restart { border: 1.5px solid var(--surface2); background: transparent; color: var(--ink-faint); }
   .btn-restart:hover { border-color: var(--red); color: var(--red); }
 
-  .btn-play { display: flex; align-items: center; gap: 0.5rem; padding: 0.72rem 0.95rem; border-radius: 4px; border: 1.5px solid var(--surface2); background: transparent; color: var(--ink-soft); font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-  .btn-play:hover { border-color: var(--ink-soft); color: var(--ink); }
-  .btn-play:disabled { opacity: 0.35; cursor: default; }
+  .btn-play {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.74rem 0.9rem; border-radius: 4px;
+    border: 1.5px solid var(--surface2); background: transparent; color: var(--ink-soft);
+    font-family: 'DM Mono', monospace; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-play:hover:not(:disabled) { border-color: var(--ink-soft); color: var(--ink); }
+  .btn-play:disabled { opacity: 0.3; cursor: default; }
 
   .timer { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--ink-faint); margin-left: auto; }
   .timer.active { color: var(--red); }
   .timer.paused-col { color: var(--pause-color); }
 
-  .hint-text { font-family: 'DM Mono', monospace; font-size: 0.59rem; letter-spacing: 0.08em; color: var(--ink-faint); padding: 0 0.1rem; min-height: 1em; }
+  .hint-text { font-family: 'DM Mono', monospace; font-size: 0.59rem; letter-spacing: 0.08em; color: var(--ink-faint); min-height: 1em; }
 
-  /* ANALYSIS */
-  .analysis-panel { margin-top: 1rem; padding: 1rem 1.2rem; background: var(--surface); border-radius: 4px; display: none; }
-  .analysis-panel.visible { display: block; }
-  .analysis-title { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.8rem; }
+  /* SUBMIT STATE */
+  .submit-overlay {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center; gap: 1rem;
+  }
+  .submit-overlay.visible { display: flex; }
+  .submit-spinner {
+    width: 32px; height: 32px; border: 2px solid var(--accent-pale);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .submit-msg { font-size: 1rem; color: var(--ink-soft); }
 
-  .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
-  @media (min-width: 480px) { .metrics-grid { grid-template-columns: repeat(4, 1fr); } }
+  /* FINAL SCREEN */
+  .final-screen {
+    display: none; text-align: center; padding: 3rem 2rem;
+    background: white; border: 1px solid var(--accent-pale); border-radius: 6px;
+    box-shadow: 0 4px 32px rgba(45,90,61,0.08);
+    animation: fadeUp 0.6s ease both;
+  }
+  .final-screen.visible { display: block; }
+  .final-check { font-size: 2.5rem; margin-bottom: 1rem; }
+  .final-title { font-size: 1.8rem; font-weight: 300; color: var(--accent); margin-bottom: 0.6rem; }
+  .final-sub { font-size: 1rem; color: var(--ink-soft); line-height: 1.6; max-width: 400px; margin-inline: auto; }
+  .final-id { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink-faint); margin-top: 1.2rem; letter-spacing: 0.1em; }
 
-  .metric-card { background: white; border-radius: 4px; padding: 0.65rem 0.7rem; border: 1px solid var(--surface2); }
-  .metric-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.3rem; }
-  .metric-value { font-size: 1.3rem; font-weight: 600; color: var(--ink); line-height: 1; }
-  .metric-value.high { color: var(--red); }
-  .metric-value.medium { color: var(--warn); }
-  .metric-value.low { color: var(--accent); }
-  .metric-sub { font-size: 0.7rem; color: var(--ink-faint); margin-top: 0.15rem; }
+  /* UPLOAD STATUS */
+  .upload-status {
+    font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em;
+    color: var(--ink-faint); text-align: center; padding: 0.5rem;
+    min-height: 1.4em;
+  }
+  .upload-status.error { color: var(--red); }
+  .upload-status.ok { color: var(--accent); }
 
-  .detail-row { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--surface2); }
-  .detail-label { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem; }
-  .bar-group { display: flex; flex-direction: column; gap: 0.35rem; }
-  .bar-item { display: flex; align-items: center; gap: 0.6rem; }
-  .bar-label { width: 90px; color: var(--ink-soft); font-size: 0.8rem; }
-  .bar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.8s cubic-bezier(.4,0,.2,1); }
-  .bar-fill.warm { background: var(--warn); }
-  .bar-fill.hot { background: var(--red); }
-  .bar-val { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--ink-faint); width: 36px; text-align: right; }
-  .notes-text { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.6; font-style: italic; }
-
-  /* DOWNLOAD */
-  .download-section { margin-top: 2.5rem; padding: 1.8rem; background: var(--accent-pale); border: 1px solid rgba(45,90,61,0.2); border-radius: 6px; display: none; animation: fadeUp 0.6s ease both; }
-  .download-section.visible { display: block; }
-  .download-title { font-size: 1.3rem; font-weight: 400; margin-bottom: 0.4rem; color: var(--accent); }
-  .download-sub { font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 1.2rem; }
-  .btn-group { display: flex; flex-wrap: wrap; gap: 0.7rem; }
-  .btn-download { display: flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.2rem; border-radius: 4px; border: 1.5px solid var(--accent); background: var(--accent); color: white; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: all 0.2s; }
-  .btn-download:hover { background: var(--accent-light); }
-  .btn-download.secondary { background: transparent; color: var(--accent); }
-  .btn-download.secondary:hover { background: rgba(45,90,61,0.08); }
-
-  /* PROGRESS */
-  .progress-bar { display: flex; justify-content: center; gap: 0.5rem; margin: 1.5rem 0; animation: fadeUp 0.8s 0.1s ease both; }
-  .progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface2); transition: background 0.3s; }
-  .progress-dot.done { background: var(--accent); }
-  .progress-dot.current { background: var(--accent-light); }
-
+  /* ANIMATIONS */
   @keyframes fadeDown { from { opacity:0; transform:translateY(-16px);} to {opacity:1;transform:translateY(0);} }
   @keyframes fadeUp   { from { opacity:0; transform:translateY(14px); } to {opacity:1;transform:translateY(0);} }
   @keyframes pulse-btn { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4);} 50%{box-shadow:0 0 0 8px rgba(192,57,43,0);} }
   @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  footer { margin-top: 3rem; text-align: center; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; color: var(--ink-faint); position: relative; z-index: 2; animation: fadeUp 1s 0.6s ease both; }
+  footer { margin-top: 3rem; text-align: center; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; color: var(--ink-faint); position: relative; z-index: 2; }
 </style>
 </head>
 <body>
@@ -195,25 +241,81 @@
 <div class="container">
 
   <header>
-    <div class="header-label">Ricerca sul Clima — Intervista</div>
-    <h1>La tua voce<br>sul <em>cambiamento</em></h1>
+    <div class="header-label">Ricerca sul Clima · Università G. d'Annunzio</div>
+    <h1>La sua voce<br>sul <em>cambiamento climatico</em></h1>
     <div class="divider"></div>
-    <p class="subtitle">Rispondi liberamente alle domande seguenti. Non ci sono risposte giuste o sbagliate.</p>
+    <p class="subtitle">Un'intervista breve e riservata. Le sue risposte contribuiranno a una ricerca accademica sul tema.</p>
   </header>
 
-  <div class="intro-card">
-    <strong>Come funziona:</strong> premi <em>Avvia</em> per iniziare.
-    Un clic mette in <em>pausa</em> — puoi riprendere quando vuoi.
-    Quando hai finito, premi <em>✓ Invia</em> per confermare,
-    oppure <em>↺ Ricomincia</em> per registrare da capo.
+  <!-- INTRO & GUIDE -->
+  <div class="section-card" style="animation-delay:0.15s">
+    <div class="section-label">Come partecipare</div>
+    <div class="intro-text">
+      <p>Questa intervista si svolge interamente in forma <strong>audio</strong>. Non ci sono risposte giuste o sbagliate: siamo interessati alla sua esperienza e alla sua opinione personale sul cambiamento climatico.</p>
+      <p>Le verranno poste <strong>due domande aperte</strong>. Per ciascuna, risponda liberamente usando la sua voce. Parli come se raccontasse a un conoscente la sua esperienza — in modo naturale, con i suoi tempi.</p>
+      <p>La seconda domanda si sblocca automaticamente dopo aver inviato la prima risposta. Al termine, la sua partecipazione sarà completata automaticamente.</p>
+    </div>
+
+    <div class="guide-grid" style="margin-top:1.4rem">
+      <div class="guide-item">
+        <div class="guide-icon">🎙️</div>
+        <div class="guide-title">Avvia</div>
+        <div class="guide-desc">Clicca "Avvia risposta" e parli liberamente. Vedrà la forma d'onda muoversi.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-icon">⏸️</div>
+        <div class="guide-title">Pausa</div>
+        <div class="guide-desc">Se ha bisogno di pensare, clicchi "Pausa". Riprenda quando vuole.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-icon">✓</div>
+        <div class="guide-title">Invia</div>
+        <div class="guide-desc">Quando ha finito, clicchi "✓ Invia" per confermare la risposta.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-icon">↺</div>
+        <div class="guide-title">Ricomincia</div>
+        <div class="guide-desc">Se vuole riregistrare, clicchi "↺ Ricomincia" prima di inviare.</div>
+      </div>
+    </div>
   </div>
 
-  <div class="progress-bar">
+  <!-- BENCHMARK AUDIO -->
+  <div class="section-card" style="animation-delay:0.3s">
+    <div class="section-label">Prova il microfono — testo di riferimento</div>
+    <div class="intro-text">
+      <p>Prima di rispondere, la invitiamo a <strong>leggere ad alta voce</strong> il testo qui sotto — oppure semplicemente ad ascoltare come suona la sua voce nel microfono. Questo le permetterà di verificare che tutto funzioni correttamente.</p>
+    </div>
+
+    <div class="benchmark-wrap">
+      <div class="benchmark-label">Legga questo testo ad alta voce per fare una prova:</div>
+      <div class="benchmark-text">
+        «Negli ultimi anni ho notato che le stagioni sembrano cambiare in modo diverso rispetto a quando ero bambino. Le estati sono diventate più calde e lunghe, mentre gli inverni sembrano più brevi. Non so con certezza quanto dipenda dal cambiamento climatico e quanto dalla mia percezione, ma qualcosa sembra davvero diverso.»
+      </div>
+
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <button class="btn-benchmark" id="btnBench" onclick="toggleBenchmark()">
+          <span class="b-icon" id="benchIcon">🎙️</span>
+          <span id="benchLabel">Registra prova microfono</span>
+        </button>
+        <button class="btn-play" id="playBench" disabled onclick="playBenchback()" style="display:inline-flex">▶ Riascolto</button>
+      </div>
+
+      <div class="benchmark-note">
+        Questa registrazione di prova rimane solo nel suo dispositivo e non viene inviata. Serve solo a verificare che il microfono funzioni e che il volume sia adeguato.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar" id="progressBar">
+    <span class="progress-label">Domanda</span>
     <div class="progress-dot current" id="dot1"></div>
     <div class="progress-dot" id="dot2"></div>
+    <span class="progress-label" id="progressText">1 di 2</span>
   </div>
 
-  <!-- Q1 -->
+  <!-- QUESTION 1 -->
   <div class="question-block active" id="block1">
     <div class="q-meta">
       <span class="q-num">Domanda 01</span>
@@ -222,11 +324,11 @@
     <div class="question-text">
       Come descriverebbe i cambiamenti climatici che ha percepito nella sua vita quotidiana negli ultimi anni? Ci sono eventi o situazioni specifiche che l'hanno colpita particolarmente?
     </div>
-    <div class="recorder-area">
+    <div class="recorder-area" id="recArea1">
       <div class="waveform-container" id="wc1">
-        <div class="waveform-idle" id="idle1"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="waveform-paused" id="paused1">⏸ &nbsp;In pausa — clicca per continuare</div>
-        <div class="live-waveform" id="live1" style="display:none"></div>
+        <div class="wf-idle" id="idle1"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="wf-paused" id="paused1">⏸ &nbsp;In pausa — clicca Riprendi</div>
+        <div class="wf-live" id="live1" style="display:none"></div>
       </div>
       <div class="controls-row">
         <button class="btn-main" id="main1" onclick="handleMain(1)">
@@ -237,23 +339,17 @@
         <button class="btn-play" id="play1" disabled onclick="playback(1)">▶ Riascolto</button>
         <span class="timer" id="timer1">0:00</span>
       </div>
-      <div class="hint-text" id="hint1">Clicca per avviare la registrazione</div>
+      <div class="hint-text" id="hint1">Clicca "Avvia risposta" per iniziare</div>
     </div>
-    <div class="analysis-panel" id="analysis1">
-      <div class="analysis-title">Analisi Paralinguistica</div>
-      <div class="metrics-grid">
-        <div class="metric-card"><div class="metric-label">Durata</div><div class="metric-value" id="m1-dur">—</div><div class="metric-sub">secondi</div></div>
-        <div class="metric-card"><div class="metric-label">Intensità</div><div class="metric-value" id="m1-int">—</div><div class="metric-sub" id="m1-int-sub">—</div></div>
-        <div class="metric-card"><div class="metric-label">Pause</div><div class="metric-value" id="m1-pau">—</div><div class="metric-sub">rilevate</div></div>
-        <div class="metric-card"><div class="metric-label">Ritmo</div><div class="metric-value" id="m1-rhy">—</div><div class="metric-sub" id="m1-rhy-sub">—</div></div>
-      </div>
-      <div class="detail-row"><div class="detail-label">Profilo energetico (per segmento)</div><div class="bar-group" id="m1-seg"></div></div>
-      <div class="detail-row"><div class="detail-label">Osservazioni</div><div class="notes-text" id="m1-notes">—</div></div>
+    <div class="submit-overlay" id="overlay1">
+      <div class="submit-spinner"></div>
+      <div class="submit-msg">Invio in corso…</div>
     </div>
+    <div class="upload-status" id="upStatus1"></div>
   </div>
 
-  <!-- Q2 -->
-  <div class="question-block" id="block2" style="opacity:.5;pointer-events:none;">
+  <!-- QUESTION 2 -->
+  <div class="question-block locked" id="block2">
     <div class="q-meta">
       <span class="q-num">Domanda 02</span>
       <span class="q-status" id="status2">In attesa</span>
@@ -261,11 +357,11 @@
     <div class="question-text">
       Qual è il cambiamento climatico che la preoccupa di più per il futuro, e cosa pensa che noi — come individui e come società — potremmo o dovremmo fare?
     </div>
-    <div class="recorder-area">
+    <div class="recorder-area" id="recArea2">
       <div class="waveform-container" id="wc2">
-        <div class="waveform-idle" id="idle2"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="waveform-paused" id="paused2">⏸ &nbsp;In pausa — clicca per continuare</div>
-        <div class="live-waveform" id="live2" style="display:none"></div>
+        <div class="wf-idle" id="idle2"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="wf-paused" id="paused2">⏸ &nbsp;In pausa — clicca Riprendi</div>
+        <div class="wf-live" id="live2" style="display:none"></div>
       </div>
       <div class="controls-row">
         <button class="btn-main" id="main2" onclick="handleMain(2)">
@@ -276,70 +372,115 @@
         <button class="btn-play" id="play2" disabled onclick="playback(2)">▶ Riascolto</button>
         <span class="timer" id="timer2">0:00</span>
       </div>
-      <div class="hint-text" id="hint2">Clicca per avviare la registrazione</div>
+      <div class="hint-text" id="hint2">Disponibile dopo aver inviato la prima risposta</div>
     </div>
-    <div class="analysis-panel" id="analysis2">
-      <div class="analysis-title">Analisi Paralinguistica</div>
-      <div class="metrics-grid">
-        <div class="metric-card"><div class="metric-label">Durata</div><div class="metric-value" id="m2-dur">—</div><div class="metric-sub">secondi</div></div>
-        <div class="metric-card"><div class="metric-label">Intensità</div><div class="metric-value" id="m2-int">—</div><div class="metric-sub" id="m2-int-sub">—</div></div>
-        <div class="metric-card"><div class="metric-label">Pause</div><div class="metric-value" id="m2-pau">—</div><div class="metric-sub">rilevate</div></div>
-        <div class="metric-card"><div class="metric-label">Ritmo</div><div class="metric-value" id="m2-rhy">—</div><div class="metric-sub" id="m2-rhy-sub">—</div></div>
-      </div>
-      <div class="detail-row"><div class="detail-label">Profilo energetico (per segmento)</div><div class="bar-group" id="m2-seg"></div></div>
-      <div class="detail-row"><div class="detail-label">Osservazioni</div><div class="notes-text" id="m2-notes">—</div></div>
+    <div class="submit-overlay" id="overlay2">
+      <div class="submit-spinner"></div>
+      <div class="submit-msg">Invio in corso…</div>
     </div>
+    <div class="upload-status" id="upStatus2"></div>
   </div>
 
-  <div class="download-section" id="dlSec">
-    <div class="download-title">Grazie per la tua partecipazione</div>
-    <div class="download-sub">Le risposte sono pronte. Scarica i file audio e il report di analisi.</div>
-    <div class="btn-group">
-      <a class="btn-download" id="dl1" href="#" download="risposta_domanda1.webm">↓ Audio Domanda 1</a>
-      <a class="btn-download" id="dl2" href="#" download="risposta_domanda2.webm">↓ Audio Domanda 2</a>
-      <button class="btn-download secondary" onclick="downloadReport()">↓ Report Analisi (.txt)</button>
-    </div>
+  <!-- FINAL SCREEN -->
+  <div class="final-screen" id="finalScreen">
+    <div class="final-check">✅</div>
+    <div class="final-title">Grazie per la partecipazione</div>
+    <div class="final-sub">Le sue risposte sono state registrate con successo. Il suo contributo è prezioso per la ricerca sul cambiamento climatico.</div>
+    <div class="final-id" id="finalId"></div>
   </div>
+
 </div>
-
-<footer>Intervista riservata · Registrazioni locali · Nessun dato trasmesso</footer>
+<footer>Ricerca accademica riservata · I dati sono trattati in forma anonima</footer>
 
 <script>
-/* ══════════════════════════════════════════
-   STATE  — phase: idle | recording | paused | done
-══════════════════════════════════════════ */
-const S = {
-  1: mkState(),
-  2: mkState()
-};
+/* ══════════════════════════════════════════════════════
+   SESSION ID — 20 char alphanumeric, generated once
+══════════════════════════════════════════════════════ */
+const SESSION_ID = (() => {
+  const stored = sessionStorage.getItem('interview_session_id');
+  if (stored) return stored;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let id = '';
+  const arr = new Uint8Array(20);
+  crypto.getRandomValues(arr);
+  arr.forEach(b => id += chars[b % chars.length]);
+  sessionStorage.setItem('interview_session_id', id);
+  return id;
+})();
 
+const UPLOAD_URL = '/.netlify/functions/upload';
+
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
 function mkState() {
   return {
-    phase: 'idle',
+    phase: 'idle', // idle | recording | paused | done
     mr: null, chunks: [], stream: null,
     analyser: null, _ctx: null, animFrame: null,
     startTime: null, elapsedMs: 0, timerInt: null,
-    volHistory: [], silences: [], lastSil: null,
-    audioURL: null, audioBlob: null, analysis: null
+    volHistory: [],   // [{t, vol}] — vol 0-100, t = ms from session start
+    silences: [],     // [{start, end}] — detected silence windows
+    pauseEvents: [],  // [{t, type}] — voluntary pause/resume events
+    lastSilStart: null,
+    audioURL: null, audioBlob: null, mimeType: null,
+    sessionStart: Date.now()
   };
 }
 
-/* ══════════════════════════════════════════
-   MAIN BUTTON  — start / pause / resume
-══════════════════════════════════════════ */
+const S = { 1: mkState(), 2: mkState() };
+
+/* ══════════════════════════════════════════════════════
+   BENCHMARK MIC TEST
+══════════════════════════════════════════════════════ */
+let benchState = { recording: false, mr: null, chunks: [], stream: null, url: null };
+
+async function toggleBenchmark() {
+  if (!benchState.recording) {
+    try {
+      benchState.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      benchState.chunks = [];
+      const mr = new MediaRecorder(benchState.stream, { mimeType: mimeType() });
+      mr.ondataavailable = e => { if (e.data.size > 0) benchState.chunks.push(e.data); };
+      mr.start(100);
+      benchState.mr = mr;
+      benchState.recording = true;
+      document.getElementById('btnBench').classList.add('playing');
+      document.getElementById('benchIcon').textContent = '⏹';
+      document.getElementById('benchLabel').textContent = 'Ferma prova';
+    } catch(e) { alert('Impossibile accedere al microfono. Controlla i permessi del browser.'); }
+  } else {
+    benchState.mr.stop();
+    benchState.stream.getTracks().forEach(t => t.stop());
+    benchState.recording = false;
+    await new Promise(r => setTimeout(r, 150));
+    benchState.url = URL.createObjectURL(new Blob(benchState.chunks, { type: mimeType() }));
+    document.getElementById('btnBench').classList.remove('playing');
+    document.getElementById('benchIcon').textContent = '🎙️';
+    document.getElementById('benchLabel').textContent = 'Registra di nuovo';
+    document.getElementById('playBench').disabled = false;
+  }
+}
+
+function playBenchback() {
+  if (benchState.url) new Audio(benchState.url).play();
+}
+
+/* ══════════════════════════════════════════════════════
+   MAIN BUTTON
+══════════════════════════════════════════════════════ */
 function handleMain(q) {
   const s = S[q];
-  if (s.phase === 'idle')      startRec(q);
+  if (s.phase === 'idle') startRec(q);
   else if (s.phase === 'recording') pauseRec(q);
-  else if (s.phase === 'paused')    resumeRec(q);
+  else if (s.phase === 'paused') resumeRec(q);
 }
 
 /* ══ START ══ */
 async function startRec(q) {
   const s = S[q];
-  // clean previous attempt
-  s.chunks = []; s.volHistory = []; s.silences = []; s.lastSil = null;
-  s.elapsedMs = 0; s.audioURL = null; s.audioBlob = null;
+  s.chunks = []; s.volHistory = []; s.silences = []; s.pauseEvents = [];
+  s.lastSilStart = null; s.elapsedMs = 0; s.audioURL = null; s.audioBlob = null;
 
   try {
     s.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -350,18 +491,20 @@ async function startRec(q) {
 
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const src = ctx.createMediaStreamSource(s.stream);
-  const an  = ctx.createAnalyser();
-  an.fftSize = 256; an.smoothingTimeConstant = 0.6;
+  const an = ctx.createAnalyser();
+  an.fftSize = 512; an.smoothingTimeConstant = 0.5;
   src.connect(an);
   s.analyser = an; s._ctx = ctx;
+  s.mimeType = mimeType();
 
-  const mr = new MediaRecorder(s.stream, { mimeType: mimeType() });
+  const mr = new MediaRecorder(s.stream, { mimeType: s.mimeType });
   mr.ondataavailable = e => { if (e.data.size > 0) s.chunks.push(e.data); };
   mr.start(100);
   s.mr = mr;
 
   s.phase = 'recording';
   s.startTime = Date.now();
+  s.sessionStart = s.sessionStart || Date.now();
   startTimer(q);
   showLive(q);
   renderUI(q);
@@ -371,83 +514,240 @@ async function startRec(q) {
 function pauseRec(q) {
   const s = S[q];
   s.elapsedMs += Date.now() - s.startTime;
-  s.startTime = null;
-  if (s.mr && s.mr.state === 'recording') s.mr.pause();
-  clearInterval(s.timerInt);
-  cancelAnimationFrame(s.animFrame);
-  s.silences.push(Date.now()); // voluntary pause counts
+  const tMs = s.elapsedMs;
+  s.pauseEvents.push({ t: tMs, type: 'pause' });
+  if (s.mr?.state === 'recording') s.mr.pause();
+  clearInterval(s.timerInt); cancelAnimationFrame(s.animFrame);
   s.phase = 'paused';
-  showPaused(q);
-  renderUI(q);
+  showPaused(q); renderUI(q);
 }
 
 /* ══ RESUME ══ */
 function resumeRec(q) {
   const s = S[q];
-  if (s.mr && s.mr.state === 'paused') s.mr.resume();
+  s.pauseEvents.push({ t: s.elapsedMs, type: 'resume' });
+  if (s.mr?.state === 'paused') s.mr.resume();
   s.startTime = Date.now();
   s.phase = 'recording';
-  startTimer(q);
-  showLive(q);
-  renderUI(q);
+  startTimer(q); showLive(q); renderUI(q);
 }
 
 /* ══ SUBMIT ══ */
 async function submitAnswer(q) {
   const s = S[q];
+
+  // Stop recording
   if (s.phase === 'recording') {
     s.elapsedMs += Date.now() - s.startTime;
     cancelAnimationFrame(s.animFrame);
     clearInterval(s.timerInt);
   }
-  if (s.mr) { s.mr.stop(); }
+  if (s.mr && s.mr.state !== 'inactive') s.mr.stop();
   if (s.stream) s.stream.getTracks().forEach(t => t.stop());
 
   await new Promise(r => setTimeout(r, 200));
 
-  const blob = new Blob(s.chunks, { type: mimeType() || 'audio/webm' });
-  s.audioBlob = blob;
-  s.audioURL  = URL.createObjectURL(blob);
-
-  const dur = Math.round(s.elapsedMs / 1000);
-  s.analysis = analyze(q, dur);
+  s.audioBlob = new Blob(s.chunks, { type: s.mimeType || 'audio/webm' });
+  s.audioURL  = URL.createObjectURL(s.audioBlob);
   s.phase = 'done';
 
   hideLive(q);
-  renderAnalysis(q, s.analysis);
+  showOverlay(q, true);
   renderUI(q);
 
-  document.getElementById('block' + q).classList.add('done');
+  // Upload audio
+  await uploadAudio(q);
 
-  if (q === 1) {
-    const b2 = document.getElementById('block2');
-    b2.style.opacity = '1'; b2.style.pointerEvents = 'auto';
-    b2.classList.add('active');
+  // If both questions done, upload report
+  if (S[1].phase === 'done' && S[2].phase === 'done') {
+    await uploadReport();
+    showFinal();
+  } else if (q === 1) {
+    // Unlock Q2
+    showOverlay(1, false);
+    document.getElementById('block2').classList.remove('locked');
+    document.getElementById('block2').classList.add('active');
     markProgress(1);
+    document.getElementById('hint2').textContent = 'Clicca "Avvia risposta" per iniziare';
   }
-  if (q === 2) { markProgress(2); showDownload(); }
 }
 
-/* ══ CANCEL / RESTART ══ */
+/* ══ CANCEL ══ */
 function cancelAnswer(q) {
   const s = S[q];
-  if (s.mr && s.mr.state !== 'inactive') s.mr.stop();
+  if (s.mr?.state !== 'inactive') s.mr?.stop();
   if (s.stream) s.stream.getTracks().forEach(t => t.stop());
   cancelAnimationFrame(s.animFrame);
   clearInterval(s.timerInt);
 
-  Object.assign(s, mkState()); // full reset
-
+  Object.assign(S[q], mkState());
   document.getElementById('timer' + q).textContent = '0:00';
   document.getElementById('timer' + q).className = 'timer';
-  document.getElementById('analysis' + q).classList.remove('visible');
   hideLive(q);
   renderUI(q);
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
+   UPLOAD
+══════════════════════════════════════════════════════ */
+async function uploadAudio(q) {
+  const s = S[q];
+  setUpStatus(q, '⟳ Caricamento audio…');
+
+  try {
+    // Convert blob to base64
+    const base64 = await blobToBase64(s.audioBlob);
+
+    const res = await fetch(UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: SESSION_ID,
+        questionIndex: q,
+        type: 'audio',
+        data: base64,
+        mimeType: s.mimeType
+      })
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    setUpStatus(q, '✓ Audio ricevuto', 'ok');
+  } catch(e) {
+    console.error('Upload audio error:', e);
+    setUpStatus(q, '⚠ Errore caricamento — riprovi', 'error');
+  }
+}
+
+async function uploadReport() {
+  const report = buildReport();
+  try {
+    await fetch(UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: SESSION_ID,
+        type: 'report',
+        report
+      })
+    });
+  } catch(e) { console.error('Upload report error:', e); }
+}
+
+/* ══════════════════════════════════════════════════════
+   REPORT BUILDER — detailed temporal analysis
+══════════════════════════════════════════════════════ */
+function buildReport() {
+  const now = new Date().toISOString();
+  const questions = [
+    'Come descriverebbe i cambiamenti climatici percepiti nella sua vita quotidiana negli ultimi anni?',
+    'Qual è il cambiamento climatico che la preoccupa di più per il futuro, e cosa pensa si dovrebbe fare?'
+  ];
+
+  const analyses = [1, 2].map(q => {
+    const s = S[q];
+    const h = s.volHistory; // [{t, vol}]
+    if (!h.length) return { question: q, error: 'no data' };
+
+    const vols = h.map(p => p.vol);
+    const avg  = vols.reduce((a, b) => a + b, 0) / vols.length;
+    const max  = Math.max(...vols);
+    const min  = Math.min(...vols);
+    const sd   = Math.sqrt(vols.reduce((a, v) => a + (v - avg) ** 2, 0) / vols.length);
+
+    // Intensity label
+    const intensity = Math.round(Math.min(avg * 1.2, 100));
+    const intensityLabel = intensity > 65 ? 'alta' : intensity > 40 ? 'media' : 'bassa';
+
+    // Rhythm
+    const rs = sd / (avg || 1);
+    const rhythm = rs > 0.7 ? 'variato' : rs > 0.4 ? 'dinamico' : 'regolare';
+
+    // Silence events (from auto-detection)
+    const silenceEvents = s.silences.map(sil => ({
+      type: 'silenzio_automatico',
+      start_ms: sil.start,
+      end_ms: sil.end,
+      duration_ms: sil.end - sil.start
+    }));
+
+    // Voluntary pause events
+    const voluntaryEvents = s.pauseEvents.map(e => ({
+      type: e.type === 'pause' ? 'pausa_volontaria' : 'ripresa_volontaria',
+      at_ms: e.t
+    }));
+
+    // Temporal intensity profile — 1 sample per second
+    const durationSec = Math.round(s.elapsedMs / 1000);
+    const msPerSec = s.elapsedMs / durationSec;
+    const timelineBySecond = Array.from({ length: durationSec }, (_, sec) => {
+      const secStart = sec * msPerSec;
+      const secEnd   = (sec + 1) * msPerSec;
+      const slice    = h.filter(p => p.t >= secStart && p.t < secEnd);
+      const secAvg   = slice.length ? Math.round(slice.reduce((a, p) => a + p.vol, 0) / slice.length) : 0;
+      return { second: sec + 1, intensity_pct: secAvg };
+    });
+
+    // 5-segment profile
+    const segSz = Math.floor(h.length / 5) || 1;
+    const segments = Array.from({ length: 5 }, (_, i) => {
+      const sl = h.slice(i * segSz, (i + 1) * segSz);
+      return {
+        segment: i + 1,
+        start_ms: sl[0]?.t ?? 0,
+        end_ms: sl[sl.length - 1]?.t ?? 0,
+        intensity_pct: sl.length ? Math.round(sl.reduce((a, p) => a + p.vol, 0) / sl.length) : 0
+      };
+    });
+
+    // Peak moments (top 10% intensity)
+    const threshold = avg + sd * 1.5;
+    const peaks = h
+      .filter(p => p.vol >= threshold)
+      .reduce((acc, p) => {
+        const last = acc[acc.length - 1];
+        if (last && p.t - last.end_ms < 500) { last.end_ms = p.t; last.peak_vol = Math.max(last.peak_vol, p.vol); }
+        else acc.push({ start_ms: p.t, end_ms: p.t, peak_vol: p.vol });
+        return acc;
+      }, []);
+
+    return {
+      question_index: q,
+      question_text: questions[q - 1],
+      duration_seconds: durationSec,
+      summary: {
+        intensity_avg_pct: Math.round(avg),
+        intensity_max_pct: Math.round(max),
+        intensity_min_pct: Math.round(min),
+        intensity_label: intensityLabel,
+        std_deviation: Math.round(sd * 10) / 10,
+        rhythm: rhythm,
+        silence_count_auto: silenceEvents.length,
+        pause_count_voluntary: s.pauseEvents.filter(e => e.type === 'pause').length,
+        total_pause_events: silenceEvents.length + s.pauseEvents.filter(e => e.type === 'pause').length
+      },
+      timeline_by_second: timelineBySecond,
+      segments_5: segments,
+      peak_moments: peaks,
+      events_chronological: [
+        ...silenceEvents.map(e => ({ ...e, at_ms: e.start_ms })),
+        ...voluntaryEvents
+      ].sort((a, b) => (a.at_ms || a.start_ms) - (b.at_ms || b.start_ms))
+    };
+  });
+
+  return {
+    session_id: SESSION_ID,
+    generated_at: now,
+    interview_title: 'Intervista sul Cambiamento Climatico',
+    questions,
+    analyses,
+    notes: 'intensity_pct: 0-100 scala relativa al massimo rilevabile. silence_count_auto: silenzi >600ms rilevati automaticamente. pause_count_voluntary: pause attivate dall\'intervistato con il pulsante Pausa.'
+  };
+}
+
+/* ══════════════════════════════════════════════════════
    UI RENDERER
-══════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function renderUI(q) {
   const s = S[q];
   const btn   = document.getElementById('main' + q);
@@ -465,42 +765,36 @@ function renderUI(q) {
   if (s.phase === 'idle') {
     lbl.textContent = 'Avvia risposta';
     st.textContent = 'In attesa'; st.className = 'q-status';
-    hint.textContent = 'Clicca per avviare la registrazione';
-    playB.disabled = true;
-    btn.style.display = '';
+    if (q === 1) hint.textContent = 'Clicca "Avvia risposta" per iniziare';
+    playB.disabled = true; btn.style.display = '';
 
   } else if (s.phase === 'recording') {
     btn.classList.add('recording');
     lbl.textContent = 'Pausa';
     st.textContent = '● Registrazione'; st.className = 'q-status recording';
     hint.textContent = '1 clic = pausa  ·  "✓ Invia" per confermare';
-    subB.classList.add('show');
-    rstB.classList.add('show');
-    playB.disabled = true;
-    btn.style.display = '';
+    subB.classList.add('show'); rstB.classList.add('show');
+    playB.disabled = true; btn.style.display = '';
 
   } else if (s.phase === 'paused') {
     btn.classList.add('paused-state');
     lbl.textContent = 'Riprendi';
     st.textContent = '⏸ In pausa'; st.className = 'q-status paused';
-    hint.textContent = 'Clicca per riprendere  ·  oppure invia o ricomincia';
-    subB.classList.add('show');
-    rstB.classList.add('show');
-    playB.disabled = true;
-    btn.style.display = '';
+    hint.textContent = 'Clicca "Riprendi" per continuare';
+    subB.classList.add('show'); rstB.classList.add('show');
+    playB.disabled = true; btn.style.display = '';
 
   } else if (s.phase === 'done') {
     btn.style.display = 'none';
-    st.textContent = '✓ Risposta acquisita'; st.className = 'q-status done';
+    st.textContent = '✓ Risposta inviata'; st.className = 'q-status done';
     hint.textContent = '';
-    rstB.classList.add('show'); // allow re-record even after done
     playB.disabled = false;
   }
 }
 
-/* ══════════════════════════════════════════
-   WAVEFORM
-══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   WAVEFORM  (with temporal data collection)
+══════════════════════════════════════════════════════ */
 function showLive(q) {
   const s = S[q];
   document.getElementById('idle' + q).style.display = 'none';
@@ -508,16 +802,14 @@ function showLive(q) {
   document.getElementById('wc' + q).classList.remove('paused-bg');
 
   const div = document.getElementById('live' + q);
-  div.style.display = 'flex';
-  div.innerHTML = '';
+  div.style.display = 'flex'; div.innerHTML = '';
 
-  const N = 32;
+  const N = 36;
   for (let i = 0; i < N; i++) {
     const b = document.createElement('div');
     b.className = 'live-bar'; b.style.height = '4px';
     div.appendChild(b);
   }
-
   const bars = div.querySelectorAll('.live-bar');
   const an = s.analyser;
   const data = new Uint8Array(an.frequencyBinCount);
@@ -525,22 +817,37 @@ function showLive(q) {
   function draw() {
     if (s.phase !== 'recording') return;
     an.getByteFrequencyData(data);
-    const vol = data.reduce((a, b) => a + b, 0) / data.length;
-    s.volHistory.push(Math.round((vol / 255) * 100));
 
-    // silence detection
-    if (vol < 8) {
-      if (!s.lastSil) s.lastSil = Date.now();
-      else if (Date.now() - s.lastSil > 600) {
+    const vol = data.reduce((a, b) => a + b, 0) / data.length;
+    const volPct = Math.round((vol / 255) * 100);
+    const tMs = s.elapsedMs + (s.startTime ? Date.now() - s.startTime : 0);
+    s.volHistory.push({ t: Math.round(tMs), vol: volPct });
+
+    // Auto silence detection
+    if (vol < 10) {
+      if (!s.lastSilStart) s.lastSilStart = tMs;
+      else if (tMs - s.lastSilStart > 600) {
         const last = s.silences[s.silences.length - 1];
-        if (!last || Date.now() - last > 1200) s.silences.push(Date.now());
+        if (!last || last.end < s.lastSilStart) {
+          if (!last || s.lastSilStart - last.end > 800) {
+            if (!s.silences.find(si => si.start === Math.round(s.lastSilStart))) {
+              s.silences.push({ start: Math.round(s.lastSilStart), end: Math.round(tMs) });
+            } else {
+              s.silences[s.silences.length - 1].end = Math.round(tMs);
+            }
+          }
+        } else {
+          s.silences[s.silences.length - 1].end = Math.round(tMs);
+        }
       }
-    } else s.lastSil = null;
+    } else {
+      s.lastSilStart = null;
+    }
 
     const step = Math.floor(data.length / N);
     bars.forEach((bar, i) => {
       const v = data[i * step] || 0;
-      bar.style.height = Math.max(4, (v / 255) * 44) + 'px';
+      bar.style.height = Math.max(4, (v / 255) * 48) + 'px';
       const p = (v / 255) * 100;
       bar.style.background = p > 70 ? '#c0392b' : p > 45 ? '#8b4513' : 'var(--accent)';
     });
@@ -563,9 +870,9 @@ function hideLive(q) {
   document.getElementById('idle' + q).style.display = 'flex';
 }
 
-/* ══════════════════════════════════════════
-   TIMER  (pause-aware)
-══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   TIMER
+══════════════════════════════════════════════════════ */
 function startTimer(q) {
   const el = document.getElementById('timer' + q);
   el.className = 'timer active';
@@ -575,150 +882,60 @@ function startTimer(q) {
     const total = s.elapsedMs + (s.startTime ? Date.now() - s.startTime : 0);
     const sec = Math.floor(total / 1000);
     el.textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
-    if (s.phase === 'paused') {
-      el.className = 'timer paused-col';
-      clearInterval(s.timerInt);
-    }
+    if (s.phase === 'paused') { el.className = 'timer paused-col'; clearInterval(s.timerInt); }
   }, 250);
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    PLAYBACK
-══════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function playback(q) {
   if (S[q].audioURL) new Audio(S[q].audioURL).play();
 }
 
-/* ══════════════════════════════════════════
-   MIME
-══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   MISC HELPERS
+══════════════════════════════════════════════════════ */
 function mimeType() {
   const t = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
   return t.find(m => MediaRecorder.isTypeSupported(m)) || '';
 }
-function ext() {
-  const m = mimeType();
-  return m.includes('ogg') ? 'ogg' : m.includes('mp4') ? 'mp4' : 'webm';
-}
 
-/* ══════════════════════════════════════════
-   ANALYSIS
-══════════════════════════════════════════ */
-function analyze(q, duration) {
-  const s = S[q];
-  const h = s.volHistory;
-  const sil = s.silences;
-
-  if (!h.length) return { duration, intensity: 50, intensityLabel: 'media', pauseCount: sil.length, rhythm: 'regolare', segments: [], notes: 'Dati non disponibili.' };
-
-  const avg = h.reduce((a, b) => a + b, 0) / h.length;
-  const max = Math.max(...h);
-  const variance = h.reduce((a, v) => a + (v - avg) ** 2, 0) / h.length;
-  const sd = Math.sqrt(variance);
-
-  const segSz = Math.floor(h.length / 5) || 1;
-  const segments = Array.from({ length: 5 }, (_, i) => {
-    const sl = h.slice(i * segSz, (i + 1) * segSz);
-    return { label: `Seg. ${i + 1}`, value: sl.length ? Math.round(sl.reduce((a, b) => a + b, 0) / sl.length) : 0 };
+function blobToBase64(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
   });
-
-  const intensity = Math.round(Math.min(avg * 1.2, 100));
-  const intensityLabel = intensity > 65 ? 'alta' : intensity > 40 ? 'media' : 'bassa';
-  const pauseCount = sil.length;
-  const rs = sd / (avg || 1);
-  const rhythm = rs > 0.7 ? 'variato' : rs > 0.4 ? 'dinamico' : 'regolare';
-  const notes = buildNotes(intensity, pauseCount, duration, rhythm);
-
-  return { duration, intensity, intensityLabel, pauseCount, rhythm, segments, notes };
 }
 
-function buildNotes(intensity, pauses, duration, rhythm) {
-  const p = [];
-  if (intensity > 70) p.push('Risposta ad alta energia — voce sostenuta, forte coinvolgimento emotivo.');
-  else if (intensity > 45) p.push('Intensità vocale nella norma — risposta equilibrata.');
-  else p.push('Intensità contenuta — risposta riflessiva o prudente.');
-
-  if (pauses > 8) p.push(`${pauses} pause rilevate (incluse pause volontarie) — elaborazione complessa del tema.`);
-  else if (pauses > 3) p.push(`${pauses} pause rilevate — flusso narrativo con momenti di riflessione.`);
-  else p.push('Poche pause — risposta fluida e strutturata.');
-
-  if (duration < 20) p.push('Risposta breve — sintetica o argomento distante.');
-  else if (duration > 90) p.push('Risposta lunga e articolata — alto coinvolgimento col tema.');
-
-  if (rhythm === 'variato') p.push('Ritmo molto variabile — picchi emotivi marcati.');
-  else if (rhythm === 'dinamico') p.push('Ritmo dinamico — buona modulazione espressiva.');
-  return p.join(' ');
+function showOverlay(q, visible) {
+  document.getElementById('recArea' + q).style.display = visible ? 'none' : '';
+  document.getElementById('overlay' + q).className = 'submit-overlay' + (visible ? ' visible' : '');
 }
 
-function renderAnalysis(q, a) {
-  document.getElementById('analysis' + q).classList.add('visible');
-
-  const ie = document.getElementById('m' + q + '-int');
-  ie.textContent = a.intensity;
-  ie.className = 'metric-value ' + (a.intensity > 65 ? 'high' : a.intensity > 40 ? 'medium' : 'low');
-  document.getElementById('m' + q + '-int-sub').textContent = a.intensityLabel;
-  document.getElementById('m' + q + '-dur').textContent = a.duration;
-  document.getElementById('m' + q + '-pau').textContent = a.pauseCount;
-
-  const re = document.getElementById('m' + q + '-rhy');
-  re.textContent = a.rhythm === 'variato' ? '~' : a.rhythm === 'dinamico' ? '≈' : '–';
-  document.getElementById('m' + q + '-rhy-sub').textContent = a.rhythm;
-
-  const sc = document.getElementById('m' + q + '-seg');
-  sc.innerHTML = '';
-  a.segments.forEach(sg => {
-    const cls = sg.value > 65 ? 'hot' : sg.value > 40 ? 'warm' : '';
-    const d = document.createElement('div');
-    d.className = 'bar-item';
-    d.innerHTML = `<span class="bar-label">${sg.label}</span><div class="bar-track"><div class="bar-fill ${cls}" style="width:${sg.value}%"></div></div><span class="bar-val">${sg.value}%</span>`;
-    sc.appendChild(d);
-  });
-
-  document.getElementById('m' + q + '-notes').textContent = a.notes;
+function setUpStatus(q, msg, cls) {
+  const el = document.getElementById('upStatus' + q);
+  el.textContent = msg;
+  el.className = 'upload-status' + (cls ? ' ' + cls : '');
 }
 
-/* ══════════════════════════════════════════
-   PROGRESS / DOWNLOAD
-══════════════════════════════════════════ */
 function markProgress(q) {
   document.getElementById('dot' + q).className = 'progress-dot done';
-  if (q < 2) document.getElementById('dot' + (q + 1)).className = 'progress-dot current';
+  if (q < 2) {
+    document.getElementById('dot' + (q+1)).className = 'progress-dot current';
+    document.getElementById('progressText').textContent = '2 di 2';
+  }
 }
 
-function showDownload() {
-  document.getElementById('dlSec').classList.add('visible');
-  const e = ext();
-  if (S[1].audioURL) { const a = document.getElementById('dl1'); a.href = S[1].audioURL; a.download = 'risposta_domanda1.' + e; }
-  if (S[2].audioURL) { const a = document.getElementById('dl2'); a.href = S[2].audioURL; a.download = 'risposta_domanda2.' + e; }
-}
-
-function downloadReport() {
-  const lines = [
-    'REPORT ANALISI PARALINGUISTICA — INTERVISTA SUL CLIMA',
-    'Generato il: ' + new Date().toLocaleString('it-IT'),
-    '═'.repeat(55)
-  ];
-  [1, 2].forEach(q => {
-    const a = S[q].analysis;
-    if (!a) return;
-    lines.push('', 'DOMANDA ' + q, '─'.repeat(40));
-    lines.push(q === 1
-      ? 'Come descriverebbe i cambiamenti climatici percepiti nella vita quotidiana?'
-      : 'Qual è il cambiamento climatico che la preoccupa di più per il futuro?');
-    lines.push('', 'Metriche:',
-      `  Durata: ${a.duration} sec`,
-      `  Intensità vocale: ${a.intensity}/100 (${a.intensityLabel})`,
-      `  Pause: ${a.pauseCount} (incluse pause volontarie)`,
-      `  Ritmo: ${a.rhythm}`,
-      '', 'Profilo energetico:');
-    a.segments.forEach(s => lines.push(`  ${s.label}: ${s.value}%`));
-    lines.push('', 'Osservazioni paralinguistiche:', '  ' + a.notes);
-  });
-  lines.push('', '═'.repeat(55), `File audio: risposta_domanda1.${ext()} / risposta_domanda2.${ext()}`);
-
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  Object.assign(document.createElement('a'), { href: url, download: 'report_analisi_intervista.txt' }).click();
+function showFinal() {
+  document.getElementById('block1').style.display = 'none';
+  document.getElementById('block2').style.display = 'none';
+  document.getElementById('progressBar').style.display = 'none';
+  const fs = document.getElementById('finalScreen');
+  fs.classList.add('visible');
+  document.getElementById('finalId').textContent = 'Codice sessione: ' + SESSION_ID;
 }
 </script>
 </body>
