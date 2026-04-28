@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Intervista Clima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d26;
+    --surface2: #22263a;
+    --border: #2a2f45;
+    --ink: #e8eaf0;
+    --ink-soft: #9ba3bf;
+    --ink-faint: #4a5068;
+    --accent: #4ade80;
+    --accent-dim: #166534;
+    --accent-pale: #0d2b1a;
+    --red: #f87171;
+    --red-dim: #7f1d1d;
+    --blue: #60a5fa;
+    --yellow: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+  /* LOGIN */
+  #loginScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;
+  }
+  .login-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 2.5rem 2rem; width: 100%; max-width: 380px; text-align: center;
+  }
+  .login-box h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 0.3rem; color: var(--ink); }
+  .login-box p { font-size: 0.7rem; color: var(--ink-faint); letter-spacing: 0.1em; margin-bottom: 2rem; }
+  .login-box input {
+    width: 100%; padding: 0.8rem 1rem; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 4px; color: var(--ink); font-family: 'DM Mono', monospace; font-size: 0.85rem;
+    margin-bottom: 0.8rem; outline: none; transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--accent); }
+  .login-box button {
+    width: 100%; padding: 0.85rem; background: var(--accent); color: #0f1117;
+    border: none; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; font-weight: 500;
+    transition: opacity 0.2s;
+  }
+  .login-box button:hover { opacity: 0.85; }
+  .login-error { color: var(--red); font-size: 0.7rem; margin-top: 0.5rem; display: none; }
+
+  /* MAIN ADMIN */
+  #adminScreen { display: none; }
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 1rem; }
+  .topbar h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; }
+  .badge { background: var(--accent-pale); color: var(--accent); border: 1px solid var(--accent-dim); font-size: 0.6rem; letter-spacing: 0.12em; padding: 0.2rem 0.5rem; border-radius: 3px; text-transform: uppercase; }
+  .btn-logout { background: transparent; border: 1px solid var(--border); color: var(--ink-soft); font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; padding: 0.4rem 0.8rem; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  .content { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+  /* STATS BAR */
+  .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.2rem; }
+  .stat-val { font-size: 1.8rem; font-weight: 500; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 0.6rem; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase; margin-top: 0.3rem; }
+
+  /* CONTROLS */
+  .controls-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .btn-refresh {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--accent-pale); border: 1px solid var(--accent-dim); color: var(--accent);
+    font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.6rem 1rem; border-radius: 4px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-refresh:hover { background: var(--accent); color: #0f1117; }
+  .filter-input {
+    flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border);
+    color: var(--ink); font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    padding: 0.58rem 0.9rem; border-radius: 4px; outline: none;
+  }
+  .filter-input:focus { border-color: var(--accent); }
+
+  /* SESSION TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th { font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); padding: 0.7rem 0.8rem; text-align: left; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: pointer; }
+  tbody tr:hover { background: var(--surface); }
+  td { padding: 0.9rem 0.8rem; font-size: 0.75rem; vertical-align: middle; }
+  .td-id { font-size: 0.68rem; letter-spacing: 0.06em; color: var(--ink-soft); }
+  .td-date { color: var(--ink-soft); white-space: nowrap; }
+
+  .pill {
+    display: inline-block; font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 2px;
+  }
+  .pill.complete { background: var(--accent-pale); color: var(--accent); border: 1px solid var(--accent-dim); }
+  .pill.partial  { background: #1c1a00; color: var(--yellow); border: 1px solid #5a4900; }
+
+  /* DOWNLOAD PANEL */
+  .dl-panel {
+    display: none; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.5rem; margin-top: 0.3rem;
+  }
+  .dl-panel.open { display: block; }
+  .dl-panel-title { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 1rem; }
+  .dl-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .btn-dl {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    background: var(--surface); border: 1px solid var(--border); color: var(--ink-soft);
+    font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em;
+    padding: 0.55rem 0.9rem; border-radius: 4px; text-decoration: none; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-dl:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-dl.audio { border-color: var(--blue); color: var(--blue); }
+  .btn-dl.audio:hover { background: rgba(96,165,250,0.1); }
+  .btn-dl.report { border-color: var(--accent); color: var(--accent); }
+  .btn-dl.report:hover { background: var(--accent-pale); }
+  .btn-dl.loading { opacity: 0.5; pointer-events: none; }
+
+  .dl-loading { font-size: 0.68rem; color: var(--ink-faint); display: flex; align-items: center; gap: 0.5rem; }
+  .spinner { width: 14px; height: 14px; border: 1.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+
+  /* EMPTY / LOADING */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--ink-faint); font-size: 0.8rem; }
+  .loading-state { text-align: center; padding: 3rem; color: var(--ink-faint); display: flex; align-items: center; justify-content: center; gap: 0.7rem; }
+
+  /* REPORT VIEWER */
+  .report-viewer {
+    margin-top: 1rem; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1rem 1.2rem; display: none; max-height: 400px; overflow-y: auto;
+  }
+  .report-viewer.open { display: block; }
+  .report-viewer pre { font-size: 0.68rem; line-height: 1.6; color: var(--ink-soft); white-space: pre-wrap; word-break: break-all; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Admin Panel</h1>
+    <p>INTERVISTA SUL CLIMA · ACCESSO RISERVATO</p>
+    <input type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Accedi</button>
+    <div class="login-error" id="loginError">Password errata</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminScreen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Admin Panel</h1>
+      <span class="badge">Intervista Clima</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Esci</button>
+  </div>
+
+  <div class="content">
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-val" id="statTotal">—</div><div class="stat-label">Sessioni totali</div></div>
+      <div class="stat-card"><div class="stat-val" id="statComplete">—</div><div class="stat-label">Complete</div></div>
+      <div class="stat-card"><div class="stat-val" id="statPartial">—</div><div class="stat-label">Parziali</div></div>
+      <div class="stat-card"><div class="stat-val" id="statLast">—</div><div class="stat-label">Ultima attività</div></div>
+    </div>
+
+    <div class="controls-bar">
+      <button class="btn-refresh" onclick="loadSessions()">⟳ Aggiorna</button>
+      <input class="filter-input" id="filterInput" placeholder="Cerca per ID sessione…" oninput="filterSessions()">
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID Sessione</th>
+            <th>Stato</th>
+            <th>Creata</th>
+            <th>Completata</th>
+            <th>Ultima att.</th>
+            <th>File</th>
+          </tr>
+        </thead>
+        <tbody id="sessionsTbody">
+          <tr><td colspan="6"><div class="loading-state"><span class="spinner"></span> Caricamento…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let AUTH_TOKEN = '';
+let allSessions = [];
+let openPanels = {};
+
+const API_SESSIONS = '/.netlify/functions/sessions';
+
+/* ── LOGIN ── */
+function doLogin() {
+  const pw = document.getElementById('pwInput').value.trim();
+  if (!pw) return;
+  AUTH_TOKEN = pw;
+  document.getElementById('loginError').style.display = 'none';
+  loadSessions();
+}
+
+function logout() {
+  AUTH_TOKEN = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminScreen').style.display = 'none';
+  document.getElementById('pwInput').value = '';
+}
+
+/* ── LOAD SESSIONS ── */
+async function loadSessions() {
+  try {
+    const res = await fetch(API_SESSIONS, {
+      headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+    });
+    if (res.status === 401) {
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    const data = await res.json();
+    allSessions = data.sessions || [];
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+
+    updateStats();
+    renderTable(allSessions);
+  } catch(e) {
+    alert('Errore di rete: ' + e.message);
+  }
+}
+
+/* ── STATS ── */
+function updateStats() {
+  const complete = allSessions.filter(s => s.completed_at).length;
+  const partial  = allSessions.length - complete;
+  const last = allSessions[0]?.updated_at;
+  document.getElementById('statTotal').textContent    = allSessions.length;
+  document.getElementById('statComplete').textContent = complete;
+  document.getElementById('statPartial').textContent  = partial;
+  document.getElementById('statLast').textContent     = last ? fmtDate(last, true) : '—';
+}
+
+/* ── FILTER ── */
+function filterSessions() {
+  const q = document.getElementById('filterInput').value.trim().toUpperCase();
+  renderTable(q ? allSessions.filter(s => s.session_id.includes(q)) : allSessions);
+}
+
+/* ── RENDER TABLE ── */
+function renderTable(sessions) {
+  const tbody = document.getElementById('sessionsTbody');
+  if (!sessions.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">Nessuna sessione trovata</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sessions.map(s => {
+    const complete = !!s.completed_at;
+    const pill = complete
+      ? '<span class="pill complete">Completa</span>'
+      : '<span class="pill partial">Parziale</span>';
+
+    // Count audio files stored
+    const audioCount = [s.audio_q1_path, s.audio_q2_path].filter(Boolean).length;
+
+    return `
+      <tr onclick="togglePanel('${s.session_id}')">
+        <td class="td-id">${s.session_id}</td>
+        <td>${pill}</td>
+        <td class="td-date">${s.created_at ? fmtDate(s.created_at) : '—'}</td>
+        <td class="td-date">${s.completed_at ? fmtDate(s.completed_at) : '—'}</td>
+        <td class="td-date">${fmtDate(s.updated_at)}</td>
+        <td style="color:var(--ink-faint);font-size:0.68rem">${audioCount}/2 audio${complete ? ' · report' : ''}</td>
+      </tr>
+      <tr id="panel-row-${s.session_id}" style="display:none">
+        <td colspan="6" style="padding:0 0.8rem 1rem">
+          <div class="dl-panel open" id="panel-${s.session_id}">
+            <div class="dl-panel-title">Sessione ${s.session_id} — file disponibili</div>
+            <div class="dl-grid" id="dlGrid-${s.session_id}">
+              <div class="dl-loading"><span class="spinner"></span> Generazione link…</div>
+            </div>
+            <div class="report-viewer" id="rv-${s.session_id}"></div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* ── TOGGLE DOWNLOAD PANEL ── */
+async function togglePanel(sessionId) {
+  const row = document.getElementById('panel-row-' + sessionId);
+  if (!row) return;
+
+  const isOpen = row.style.display !== 'none';
+  // Close all others
+  document.querySelectorAll('[id^="panel-row-"]').forEach(r => r.style.display = 'none');
+
+  if (isOpen) return;
+
+  row.style.display = '';
+  const grid = document.getElementById('dlGrid-' + sessionId);
+  grid.innerHTML = '<div class="dl-loading"><span class="spinner"></span> Generazione link…</div>';
+
+  try {
+    const res = await fetch(API_SESSIONS, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + AUTH_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ sessionId })
+    });
+    const data = await res.json();
+    const files = data.files || {};
+
+    if (!Object.keys(files).length) {
+      grid.innerHTML = '<div style="color:var(--ink-faint);font-size:0.7rem">Nessun file disponibile</div>';
+      return;
+    }
+
+    grid.innerHTML = Object.entries(files).map(([name, url]) => {
+      const isAudio  = name.startsWith('audio_');
+      const isReport = name.includes('report');
+      const cls = isAudio ? 'audio' : isReport ? 'report' : '';
+      const icon = isAudio ? '🎙' : isReport ? '📊' : '📄';
+      const label = isAudio
+        ? name.replace('audio_', 'Audio ').replace(/\.\w+$/, '')
+        : isReport ? 'Report JSON' : name;
+
+      if (isReport) {
+        return `<a class="btn-dl ${cls}" href="${url}" download="${name}">${icon} ${label}</a>
+                <button class="btn-dl" style="border-color:var(--yellow);color:var(--yellow)" onclick="viewReport('${sessionId}','${url}')">👁 Visualizza report</button>`;
+      }
+      return `<a class="btn-dl ${cls}" href="${url}" download="${name}">${icon} ${label}</a>`;
+    }).join('');
+
+  } catch(e) {
+    grid.innerHTML = '<div style="color:var(--red);font-size:0.7rem">Errore: ' + e.message + '</div>';
+  }
+}
+
+/* ── VIEW REPORT INLINE ── */
+async function viewReport(sessionId, url) {
+  const rv = document.getElementById('rv-' + sessionId);
+  if (rv.classList.contains('open')) {
+    rv.classList.remove('open'); return;
+  }
+  rv.innerHTML = '<div class="dl-loading"><span class="spinner"></span> Caricamento…</div>';
+  rv.classList.add('open');
+
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+
+    // Pretty-print with color hints
+    const formatted = JSON.stringify(json, null, 2);
+    rv.innerHTML = '<pre>' + escHtml(formatted) + '</pre>';
+  } catch(e) {
+    rv.innerHTML = '<div style="color:var(--red);font-size:0.7rem">Errore caricamento report</div>';
+  }
+}
+
+/* ── UTILS ── */
+function fmtDate(iso, short) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '—';
+  if (short) {
+    const diff = Date.now() - d;
+    if (diff < 60000) return 'ora';
+    if (diff < 3600000) return Math.floor(diff/60000) + 'm fa';
+    if (diff < 86400000) return Math.floor(diff/3600000) + 'h fa';
+  }
+  return d.toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
