@@ -536,18 +536,21 @@ function resumeRec(q) {
 async function submitAnswer(q) {
   const s = S[q];
 
-  // Stop recording
+  // Freeze elapsed time
   if (s.phase === 'recording') {
     s.elapsedMs += Date.now() - s.startTime;
     cancelAnimationFrame(s.animFrame);
     clearInterval(s.timerInt);
   }
-  if (s.mr && s.mr.state !== 'inactive') s.mr.stop();
-  if (s.stream) s.stream.getTracks().forEach(t => t.stop());
 
-  await new Promise(r => setTimeout(r, 200));
+  // Stop MediaRecorder and wait for onstop — this is the critical fix.
+  // We must wait for onstop before reading s.chunks, otherwise the last
+  // chunks have not been flushed yet and the audio file will be truncated.
+  await stopMediaRecorder(s);
 
-  s.audioBlob = new Blob(s.chunks, { type: s.mimeType || 'audio/webm' });
+  // Now chunks are complete — build the blob
+  const mime = s.mimeType || 'audio/webm';
+  s.audioBlob = new Blob(s.chunks, { type: mime });
   s.audioURL  = URL.createObjectURL(s.audioBlob);
   s.phase = 'done';
 
@@ -555,21 +558,41 @@ async function submitAnswer(q) {
   showOverlay(q, true);
   renderUI(q);
 
-  // Upload audio
+  // Upload audio to Supabase via Netlify function
   await uploadAudio(q);
 
-  // If both questions done, upload report
-  if (S[1].phase === 'done' && S[2].phase === 'done') {
-    await uploadReport();
-    showFinal();
-  } else if (q === 1) {
-    // Unlock Q2
+  // After Q1: unlock Q2
+  if (q === 1) {
     showOverlay(1, false);
     document.getElementById('block2').classList.remove('locked');
     document.getElementById('block2').classList.add('active');
     markProgress(1);
     document.getElementById('hint2').textContent = 'Clicca "Avvia risposta" per iniziare';
   }
+
+  // After Q2: upload report and show final screen
+  if (q === 2) {
+    await uploadReport();
+    showFinal();
+  }
+}
+
+/* Wait for MediaRecorder to fully stop and flush all chunks */
+function stopMediaRecorder(s) {
+  return new Promise(resolve => {
+    if (!s.mr || s.mr.state === 'inactive') {
+      if (s.stream) s.stream.getTracks().forEach(t => t.stop());
+      resolve();
+      return;
+    }
+    s.mr.onstop = () => {
+      if (s.stream) s.stream.getTracks().forEach(t => t.stop());
+      resolve();
+    };
+    // Request any remaining buffered data before stopping
+    s.mr.requestData();
+    s.mr.stop();
+  });
 }
 
 /* ══ CANCEL ══ */
@@ -588,33 +611,62 @@ function cancelAnswer(q) {
 }
 
 /* ══════════════════════════════════════════════════════
-   UPLOAD
+   UPLOAD — audio va direttamente a Supabase Storage
+   tramite la funzione Netlify che restituisce un
+   signed upload URL. Così evitiamo il limite 6MB
+   del body delle Netlify Functions.
 ══════════════════════════════════════════════════════ */
 async function uploadAudio(q) {
   const s = S[q];
   setUpStatus(q, '⟳ Caricamento audio…');
 
   try {
-    // Convert blob to base64
-    const base64 = await blobToBase64(s.audioBlob);
+    const ext = s.mimeType?.includes('ogg') ? 'ogg'
+              : s.mimeType?.includes('mp4') ? 'mp4' : 'webm';
 
-    const res = await fetch(UPLOAD_URL, {
+    // Step 1: ask the function for a signed upload URL
+    const signRes = await fetch(UPLOAD_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sessionId: SESSION_ID,
         questionIndex: q,
-        type: 'audio',
-        data: base64,
+        type: 'sign',
+        ext,
         mimeType: s.mimeType
       })
     });
+    if (!signRes.ok) throw new Error('sign HTTP ' + signRes.status);
+    const { signedUrl, token, filePath } = await signRes.json();
 
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    setUpStatus(q, '✓ Audio ricevuto', 'ok');
+    // Step 2: upload the binary blob directly to Supabase (no base64, no size limit)
+    const upRes = await fetch(signedUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': s.mimeType || 'audio/webm',
+        'x-upsert': 'true'
+      },
+      body: s.audioBlob
+    });
+    if (!upRes.ok) throw new Error('storage PUT ' + upRes.status);
+
+    // Step 3: confirm to the function so it updates the DB record
+    const confRes = await fetch(UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: SESSION_ID,
+        questionIndex: q,
+        type: 'confirm',
+        filePath
+      })
+    });
+    if (!confRes.ok) throw new Error('confirm HTTP ' + confRes.status);
+
+    setUpStatus(q, '✓ Audio salvato', 'ok');
   } catch(e) {
     console.error('Upload audio error:', e);
-    setUpStatus(q, '⚠ Errore caricamento — riprovi', 'error');
+    setUpStatus(q, '⚠ Errore caricamento. Riprovi.', 'error');
   }
 }
 
@@ -899,15 +951,6 @@ function playback(q) {
 function mimeType() {
   const t = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
   return t.find(m => MediaRecorder.isTypeSupported(m)) || '';
-}
-
-function blobToBase64(blob) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(blob);
-  });
 }
 
 function showOverlay(q, visible) {
